@@ -1,0 +1,182 @@
+<head>
+	<link href="catalog/view/theme/default/stylesheet/common/breadcrumbs.css" type="text/css" rel="stylesheet"/>
+	<link href="catalog/view/theme/default/stylesheet/common/singleproduct.css" type="text/css" rel="stylesheet"/>
+	<link href="catalog/view/theme/default/stylesheet/common/product.css" type="text/css" rel="stylesheet"/>
+</head>
+
+{{header}}
+
+<div class="single-product">
+
+	<div class="left">
+	{% if breadcrumbs %}
+			<div class="breadcrumbs">
+				{% for breadcrumb in breadcrumbs %}
+					<div>
+						{% if loop.last %}
+						<div class="last">
+							<span class="last">{{ breadcrumb.text }}</span>
+							</div>
+						{% else %}
+							<a class="link" href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a>
+							<span>/</span>
+						{% endif %}
+					</div>
+				{% endfor %}
+			</div>
+		{% endif %}
+		<img class="product-image" src="{{ image_url }}" alt="{{ name }}" onerror="this.onerror=null; this.src='image/no_image.png';"/>
+	</div>
+	<div class="right">
+
+		
+
+		<div class="product-name">
+			{{name}}
+		</div>
+
+		<div class="rating">
+			{{ stars|raw }}
+		</div>
+		<div class="warehouse-info">
+			<div>
+				<img src="image/catalog/assets/on_stock_ico.svg"/>
+				<span>{{quantity}}&nbsp;</span>
+				<span>w magazynie</span>
+			</div>
+			<div class="block">
+				<img src="image/catalog/assets/shipment_ico.svg"/>
+				<span>Termin wysyłki&nbsp;</span>
+				<span>2 dni robocze</span>
+			</div>
+		</div>
+		<div class="description">
+			{{description|raw}}
+		</div>
+		<div class="additional-info">
+			<div>
+				<span class="bold">Brand :</span>
+				<span class="common">Spichlerz</span>
+			</div>
+			<div>
+				<span class="bold">SKU :</span>
+				<span class="common">{{sku}}</span>
+			</div>
+			<div>
+				<span class="bold">Category :</span>
+				<span class="common">{{category}}</span>
+			</div>
+			<div>
+				<span class="bold">GTIN :</span>
+				<span class="common"></span>
+			</div>
+			<div class="price">
+				{{price}}
+				zł
+			</div>
+		</div>
+		<div class="actions">
+			<div class="count">
+				<div class="event" id="minus">-</div>
+				<div id="value">1</div>
+				<div class="event" id="add">+</div>
+			</div>
+			<div id="addToCartBtn" class="to-cart" data-product-id={{id}}>
+				<p>DO KOSZYKA</p>
+				<img src="image/catalog/assets/add_to_cart_ico.svg"/>
+			</div>
+		</div>
+	</div>
+
+</div>
+<div class="accordion">
+	<div class="accordion-item">
+		<button class="accordion-header">Opis produktu</button>
+		<div class="accordion-content">
+			<p>Pełny opis produktu znajduje się tutaj. Możesz dodać dowolną treść.</p>
+		</div>
+	</div>
+	<div class="accordion-item">
+		<button class="accordion-header">Opinie</button>
+		<div class="accordion-content">
+			<p>Przeczytaj opinie innych użytkowników o tym produkcie.</p>
+		</div>
+	</div>
+	<div class="accordion-item">
+		<button class="accordion-header">Dodaj opinię</button>
+		<div class="accordion-content">
+			<form action="/submit-opinion" method="post" class="opinion-form">
+				<div class="form-control">
+					<label for="rating">Twoja ocena *</label>
+					<div class="rating-stars">
+						<input type="radio" id="star5" name="rating" value="5">
+						<label for="star5" title="5 stars">
+							<svg width="13" height="12" viewbox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M6.5 0.618034L7.59607 3.99139C7.72994 4.40341 8.1139 4.68237 8.54713 4.68237H12.0941L9.22453 6.76722C8.87405 7.02186 8.72739 7.47323 8.86126 7.88526L9.95733 11.2586L7.08779 9.17376C6.7373 8.91912 6.2627 8.91912 5.91221 9.17376L3.04267 11.2586L4.13874 7.88525C4.27261 7.47323 4.12595 7.02186 3.77547 6.76722L0.905918 4.68237H4.45287C4.8861 4.68237 5.27006 4.40341 5.40393 3.99139L6.5 0.618034Z" stroke="#C7A992"/>
+							</svg>
+						</label>
+						<input type="radio" id="star4" name="rating" value="4">
+						<label for="star4" title="4 stars">
+							<svg width="13" height="12" viewbox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M6.5 0.618034L7.59607 3.99139C7.72994 4.40341 8.1139 4.68237 8.54713 4.68237H12.0941L9.22453 6.76722C8.87405 7.02186 8.72739 7.47323 8.86126 7.88526L9.95733 11.2586L7.08779 9.17376C6.7373 8.91912 6.2627 8.91912 5.91221 9.17376L3.04267 11.2586L4.13874 7.88525C4.27261 7.47323 4.12595 7.02186 3.77547 6.76722L0.905918 4.68237H4.45287C4.8861 4.68237 5.27006 4.40341 5.40393 3.99139L6.5 0.618034Z" stroke="#C7A992"/>
+							</svg>
+						</label>
+						<input type="radio" id="star3" name="rating" value="3">
+						<label for="star3" title="3 stars">
+							<svg width="13" height="12" viewbox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M6.5 0.618034L7.59607 3.99139C7.72994 4.40341 8.1139 4.68237 8.54713 4.68237H12.0941L9.22453 6.76722C8.87405 7.02186 8.72739 7.47323 8.86126 7.88526L9.95733 11.2586L7.08779 9.17376C6.7373 8.91912 6.2627 8.91912 5.91221 9.17376L3.04267 11.2586L4.13874 7.88525C4.27261 7.47323 4.12595 7.02186 3.77547 6.76722L0.905918 4.68237H4.45287C4.8861 4.68237 5.27006 4.40341 5.40393 3.99139L6.5 0.618034Z" stroke="#C7A992"/>
+							</svg>
+						</label>
+						<input type="radio" id="star2" name="rating" value="2">
+						<label for="star2" title="2 stars">
+							<svg width="13" height="12" viewbox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M6.5 0.618034L7.59607 3.99139C7.72994 4.40341 8.1139 4.68237 8.54713 4.68237H12.0941L9.22453 6.76722C8.87405 7.02186 8.72739 7.47323 8.86126 7.88526L9.95733 11.2586L7.08779 9.17376C6.7373 8.91912 6.2627 8.91912 5.91221 9.17376L3.04267 11.2586L4.13874 7.88525C4.27261 7.47323 4.12595 7.02186 3.77547 6.76722L0.905918 4.68237H4.45287C4.8861 4.68237 5.27006 4.40341 5.40393 3.99139L6.5 0.618034Z" stroke="#C7A992"/>
+							</svg>
+						</label>
+						<input type="radio" id="star1" name="rating" value="1">
+						<label for="star1" title="1 star">
+							<svg width="13" height="12" viewbox="0 0 13 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M6.5 0.618034L7.59607 3.99139C7.72994 4.40341 8.1139 4.68237 8.54713 4.68237H12.0941L9.22453 6.76722C8.87405 7.02186 8.72739 7.47323 8.86126 7.88526L9.95733 11.2586L7.08779 9.17376C6.7373 8.91912 6.2627 8.91912 5.91221 9.17376L3.04267 11.2586L4.13874 7.88525C4.27261 7.47323 4.12595 7.02186 3.77547 6.76722L0.905918 4.68237H4.45287C4.8861 4.68237 5.27006 4.40341 5.40393 3.99139L6.5 0.618034Z" stroke="#C7A992"/>
+							</svg>
+						</label>
+					</div>
+
+				</div>
+				<div class="form-control">
+					<input placeholder="Twoje imię *" type="text" id="name" name="name" required>
+				</div>
+				<div class="form-control">
+					<textarea placeholder="Twoja opinia *" id="opinion" name="opinion" required></textarea>
+				</div>
+				<div class="button-container">
+					<button type="submit" class="submit-button">
+						<div>Wyślij</div><img src="image/catalog/assets/arrow_right.svg"/></button>
+				</div>
+				<div class="separator"></div>
+			</form>
+		</div>
+	</div>
+
+</div>
+<div class="products-container-wrapper">
+	<div class="header">
+		<p class="title-mobile">Może Ci się spodobać również</p>
+		<p class="title">
+			Może Ci się spodobać również
+		</p>
+
+		<a href="index.php?route=common/shop">
+			<div class="nav-to">
+				<p>WSZYSTKO</p>
+				<img src="image/catalog/assets/arrow_right.svg"/>
+			</div>
+		</a>
+	</div>
+
+	<div class="main">
+		<div id="products-container" class="products-container"></div>
+	</div>
+</div>
+{{footer}}
+ <script type="text/javascript" src="catalog/view/javascript/products/createProductCard.js"></script>
+ <script type="text/javascript" src="catalog/view/javascript/singleproduct/singleproduct.js"></script>

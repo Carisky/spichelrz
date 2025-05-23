@@ -1,0 +1,267 @@
+{{ header }}
+<div id="checkout-checkout" class="page-wrapper container">
+	<h1 class="page-title cnt">{{ heading_title }}</h1>
+	<div class="cat-short-description cnt">{{ heading_subtitle }}</div>
+	<form id="checkout">
+		<div class="checkout-cart">
+			<h2 class="product-title2">{{ text_cart }}</h2>
+			<div class="checkout-cart-list" data-cart>
+				{% if products %}
+					<table class="cart-table" width="100%" border="1" cellspacing="0" cellpadding="5">
+						<thead>
+							<tr>
+								<th>Zdjęcie</th>
+								<th>Nazwa</th>
+								<th>Ilość</th>
+								<th>Cena</th>
+								<th>Łączna cena</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for product in products %}
+								<tr>
+									<td>
+										{% if product.image %}
+											<img src="/image/{{ product.image }}" alt="{{ product.name }}" width="50" height="50">
+										{% endif %}
+									</td>
+									<td>{{ product.name }}</td>
+									<td>{{ product.quantity }}</td>
+									<td>{{ product.price }}</td>
+									<td>{{ (product.price * product.quantity) | number_format(2, ',', ' ') }}</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				{% else %}
+					<p>Корзина пуста</p>
+				{% endif %}
+			</div>
+			<div class="checkout-main df jcsb">
+				<div class="column left-col">
+					<h2 class="product-title2">{{ text_your_details }}</h2>
+					<div class="checkout-profile" data-address>{{ address }}</div>
+				</div>
+				<div class="column right-col">
+					<h2 class="column product-title2">{{ text_shipping_method }}</h2>
+					<div class="checkout-shipping" data-shipping>{{ shipping }}</div>
+					<h2 class="column product-title2">{{ text_payment_method }}</h2>
+					<div class="checkout-payment" data-payment>{{ payment }}</div>
+					<h2 class="column product-title2">{{ text_totals }}</h2>
+					<div class="checout-codes">
+						{{ coupon }}{{ reward }}
+					</div>
+					<div class="checkout-totals" data-totals>{{ totals }}</div>
+					<div class="form-block" data-error="agree">
+						<label class="checkbox large-box df small-text">
+							<input type="checkbox" name="agree" value="1" {{ agree ? ' checked' }}>
+							<b></b>
+							<div>Zapoznałem się i akceptuję <a href="/regulamin-sklepu">Regulamin Sklepu</a> Internetowego, <a href="/polityka">Politykę Prywatności</a> w celu realizacji zamówienia. *</div>
+						</label>
+						<div class="form-error"></div>
+					</div>
+					<div class="confirm df jce">
+						<button type="button" class="btn df aic jcc" onclick="save()">
+							Zamawiam
+							<svg width="24" height="27">
+								<use xlink:href="/catalog/view/theme/noir/img/sprite.svg#cart"></use>
+							</svg>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</form>
+	<div id="payment" style="display:none;"></div>
+</div>
+{{ footer }}
+{% if map_key %}
+	 <script src="catalog/view/theme/noir/js/inpost.js"></script>
+	 <script src="https://maps.googleapis.com/maps/api/js?key={{ map_key }}&callback=initMap"></script>
+	 <script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
+	{% set geoWidgetToken = 'eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJzQlpXVzFNZzVlQnpDYU1XU3JvTlBjRWFveFpXcW9Ua2FuZVB3X291LWxvIn0.eyJleHAiOjIwMTM1NzA1OTcsImlhdCI6MTY5ODIxMDU5NywianRpIjoiZjFhZGIzMTMtZjMzYy00ZmNjLTlkMWMtYTAwOWU0MjAzNDVjIiwiaXNzIjoiaHR0cHM6Ly9sb2dpbi5pbnBvc3QucGwvYXV0aC9yZWFsbXMvZXh0ZXJuYWwiLCJzdWIiOiJmOjEyNDc1MDUxLTFjMDMtNGU1OS1iYTBjLTJiNDU2OTVlZjUzNTpiNmY4cEM5ZXNpS1l5YzZpOS1tWHV2eXd6M2dLOURBb0xBOS1SX0t4dXVVIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoic2hpcHgiLCJzZXNzaW9uX3N0YXRlIjoiMjMxYzI4NjgtNzA0Ny00OTQ2LWJjOTktYjNkNjg2ZTkwNWU3Iiwic2NvcGUiOiJvcGVuaWQgYXBpOmFwaXBvaW50cyIsInNpZCI6IjIzMWMyODY4LTcwNDctNDk0Ni1iYzk5LWIzZDY4NmU5MDVlNyIsImFsbG93ZWRfcmVmZXJyZXJzIjoidGhlamFyLmNvbS5wbCIsInV1aWQiOiJlMTY0ZDg5Zi1kMmYxLTQyZDAtODcxMy05ZTAyYzUyNDllNmYifQ.pI2gaWrRkNXzr44Js8UWEqZzKZ-UpvR713S2lN8FZcJsyGSQJc8ImhERl4hOX77YsQG91fJ6MygYG4PtUc3bXnnlOcbGPOEgaQscwQC8jOEnY5fG-ilda_W_ENA48g1C0scXvJnFWhnextxDf1xKSZooKiz35j0UvFNeBN9LTSKE3G2RsunuNvRaJ0J9GtQm1uAfozTB7aRSpSdMeDploFGo6aFrMCohTNW84mX7rezDan8kcZw_wkWOOfpKDkE44TVPa-iwFnj6L6BA0ziFVGDkHWxxaTRCcsHiXCUam5uiYgxOZzbQQtsW8UgH4MgKe7NGS1SeDQTB0_VHi9BOiA'  %}<div class="modal fade" id="inpostGeoWidgetModal" tabindex="-1" role="dialog"> </div>
+	{% if inpostSandbox %}
+		{% set geoWidgetUrl = 'https://sandbox-easy-geowidget-sdk.easypack24.net' %}
+	{% else %}
+		{% set geoWidgetUrl = 'https://geowidget.inpost.pl' %}
+	{% endif %}
+	<link
+	rel="stylesheet" href="{{ geoWidgetUrl }}/inpost-geowidget.css"/>
+ <script src="{{ geoWidgetUrl }}/inpost-geowidget.js" defer></script>
+{% endif %}
+ <script>
+	function saveCoupon() {
+		$(document).find('[data-error="coupon"]').removeClass('input-error').find('.form-error').text('').hide();
+		$('body').append(loader);
+		$.ajax({
+			url: 'index.php?route=checkout/buy/save_coupon',
+			type: 'post',
+			dataType: 'json',
+			data: {
+				coupon: $(document).find('[name="coupon"]').val(),
+			},
+			success: function(json) {
+				$('#loader').remove();
+				if (json.error)  $(document).find('[data-error="coupon"]').addClass('input-error').find('.form-error').text(json.error).show();
+				if (json.success) nrShowMessage(json.success, 1);
+			},
+			error: function(data) {
+				$('#loader').remove();
+				console.log(data.responseText);
+			}
+		});
+	}
+	
+	function saveReward() {
+		$(document).find('[data-error="reward"]').removeClass('input-error').find('.form-error').text('').hide();
+		$('body').append(loader);
+		$.ajax({
+			url: 'index.php?route=checkout/buy/save_reward',
+			type: 'post',
+			dataType: 'json',
+			data: {
+				reward: $(document).find('[name="reward"]').val(),
+			},
+			success: function(json) {
+				$('#loader').remove();
+				if (json.error)  $(document).find('[data-error="reward"]').addClass('input-error').find('.form-error').text(json.error).show();
+				if (json.success) {
+					$(document).find('[data-points]').text(json.reward);
+					nrShowMessage(json.success, 1);
+				}
+			},
+			error: function(data) {
+				$('#loader').remove();
+				console.log(data.responseText);
+			}
+		});
+	}
+	
+	function cartUpdate() {
+		$('body').append(loader);
+		$.ajax({
+			url: 'index.php?route=checkout/buy/refresh_cart',
+			type: 'post',
+			dataType: 'json',
+			success: function(json) {
+				//console.log(json);
+				$('#loader').remove();
+				checkJson(json);
+				$('[data-cart]').html(json.cart);
+				$('[data-shipping]').html(json.shipping);
+				$('[data-payment]').html(json.payment);
+				$('[data-totals]').html(json.totals);
+			},
+			error: function(data) {
+				$('#loader').remove();
+				console.log(data.responseText);
+			}
+		});
+	}
+	
+	function save() {
+		$(document).find('[data-error]').removeClass('input-error').find('.form-error').text('').hide();
+		$('body').append(loader);
+		$.ajax({
+			url: 'index.php?route=checkout/buy/save_order',
+			type: 'post',
+			dataType: 'json',
+			data: $('#checkout').serialize(),
+			success: function(json) {
+				$('#loader').remove();
+				checkJson(json);
+				if(json.error) {
+					$.each(json.error, function(i, v){
+						$('[data-error="'+i+'"]').addClass('input-error').find('.form-error').text(v).show();
+					});
+				} else if(json.payment) {
+					$('#payment').html(json.payment).find('#button-confirm').click();
+				} else {
+					console.log(json);
+				}
+			},
+			error: function(data) {
+				$('#loader').remove();
+				console.log(data.responseText);
+			}
+		});
+	}
+	
+	$('[data-address]').on('change', '#input-address', function() {
+		$('body').append(loader);
+		$.ajax({
+			url: 'index.php?route=checkout/buy/change_address&address_id='+$(this).val(),
+			dataType: 'json',
+			success: function(json) {
+				$('#loader').remove();
+				checkJson(json);
+				$('[data-address]').html(json.address);
+				NiceSelect.bind(document.getElementById('input-address'));
+				NiceSelect.bind(document.getElementById('input-zone'));
+				$('[data-shipping]').html(json.shipping);
+				$('[data-payment]').html(json.payment);
+				$('[data-totals]').html(json.totals);
+			},
+			error: function(data) {
+				$('#loader').remove();
+				console.log(data.responseText);
+			}
+		});
+	});
+	
+	$('[data-address]').on('change', '#input-zone', function() {
+		$('[data-address]').find('[name="address[city]"]').val('');
+		$('[data-address]').find('[name="address[address_1]"]').val('');
+		$('[data-address]').find('[name="address[postcode]"]').val('');
+		$('body').append(loader);
+		$.ajax({
+			url: 'index.php?route=checkout/buy/change_zone&zone_id='+$(this).val(),
+			dataType: 'json',
+			success: function(json) {
+				$('#loader').remove();
+				checkJson(json);
+				$('[data-shipping]').html(json.shipping);
+				$('[data-payment]').html(json.payment);
+				$('[data-totals]').html(json.totals);
+			},
+			error: function(data) {
+				$('#loader').remove();
+				console.log(data.responseText);
+			}
+		});
+	});
+	
+	$('[data-shipping]').on('change', 'input', function() {
+		$('body').append(loader);
+		$.ajax({
+			url: 'index.php?route=checkout/buy/change_shipping&code='+$(this).filter(':checked').val(),
+			dataType: 'json',
+			success: function(json) {
+				$('#loader').remove();
+				checkJson(json);
+				$('[data-payment]').html(json.payment);
+				$('[data-totals]').html(json.totals);
+				$('body').append(json.s);
+			},
+			error: function(data) {
+				$('#loader').remove();
+				console.log(data.responseText);
+			}
+		});
+	});
+	
+	$('[data-payment]').on('change', 'input', function() {
+		$.ajax({
+			url: 'index.php?route=checkout/buy/change_payment&code='+$(this).filter(':checked').val(),
+			error: function(data) {
+				$('#loader').remove();
+				console.log(data.responseText);
+			}
+		});
+	});
+	
+	if(typeof(button) != 'function') {
+		$.fn.button = function(s){return;}
+	}
+	
+</script></body></html>

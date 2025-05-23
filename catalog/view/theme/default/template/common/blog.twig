@@ -1,0 +1,55 @@
+<head>
+	<link href="catalog/view/theme/default/stylesheet/common/breadcrumbs.css" type="text/css" rel="stylesheet"/>
+	<link href="catalog/view/theme/default/stylesheet/common/blog.css" type="text/css" rel="stylesheet"/>
+</head>
+
+{{header}}
+
+{% if breadcrumbs %}
+	<div class="breadcrumbs">
+		{% for breadcrumb in breadcrumbs %}
+			<div>
+				{% if loop.last %}
+					<span class="last">{{ breadcrumb.text }}</span>
+				{% else %}
+					<a class="link" href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a>
+					<span>
+						/
+					</span>
+					<!-- Разделитель -->
+				{% endif %}
+			</div>
+		{% endfor %}
+	</div>
+{% endif %}
+<div class="content">
+	<div class="block">
+		<img src="/image/catalog/assets/blog1.jpg"/>
+		<div>
+			<h2>Z czym jeść konfitury? Dania i napoje, z którymi przetwory owocowe smakują najlepiej</h2>
+			<p>Konfitury to świetny dodatek do wielu potraw. Pasują zarówno do posiłków na słodko, jak i nasłono. Oto dania i napoje, z którymi przetworzy owocowe smakują najlepiej. Konfitury pozwalają przechować smak i wartości odżywcze owoców przez cały rok. Możemy jeprzyrządzać samodzielnie lub sięgnąć po przetwory z...</p>
+		</div>
+	</div>
+	<div class="block desktop">
+		<div>
+			<h2>6 niedocenianych konfitur, które warto wprowadzić do jadłospisu</h2>
+			<p>Konfitury to pyszny i sprawdzony dodatek do potraw. Wiele z nich wciąż jednak nie doczekało się należnego uznania. Oto 6 konfitur, z którymi warto się zapoznać i wprowadzić je na stałe do jadłospisu. Przetwory można przyrządzać z większości owoców i warzyw. Uzyskanie pożądanego smaku często...</p>
+		</div>
+		<img src="/image/catalog/assets/blog2.jpg"/>
+	</div>
+    	<div class="block phone">
+        		<img src="/image/catalog/assets/blog2.jpg"/>
+		<div>
+			<h2>6 niedocenianych konfitur, które warto wprowadzić do jadłospisu</h2>
+			<p>Konfitury to pyszny i sprawdzony dodatek do potraw. Wiele z nich wciąż jednak nie doczekało się należnego uznania. Oto 6 konfitur, z którymi warto się zapoznać i wprowadzić je na stałe do jadłospisu. Przetwory można przyrządzać z większości owoców i warzyw. Uzyskanie pożądanego smaku często...</p>
+		</div>
+	</div>
+	<div class="block">
+		<img src="/image/catalog/assets/blog3.jpg"/>
+		<div>
+			<h2>Słodkie wspomnienie lata! 7 najlepszych konfitur na zimę</h2>
+			<p>Pieszczą podniebienie, dostarczają witamin i łagodzą tęsknotę za słońcem. Konfitury to zaklęta w słoiczku esencja lata, która poprawi nam nastrój w czasach chłodu i pobudzi inwencję do eksperymentów kulinarnych. Oto 7 konfitur owocowych, którymi warto osłodzić sobie jesień i zimę. Konfitury to zdrowa alternatywa dla...</p>
+		</div>
+	</div>
+</div>
+{{footer}}

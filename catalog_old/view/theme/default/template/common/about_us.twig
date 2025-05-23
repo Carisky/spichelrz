@@ -1,0 +1,48 @@
+<head>
+	<link href="catalog/view/theme/default/stylesheet/common/breadcrumbs.css" type="text/css" rel="stylesheet"/>
+	<link href="catalog/view/theme/default/stylesheet/common/about_us.css" type="text/css" rel="stylesheet"/>
+</head>
+
+{{header}}
+
+{% if breadcrumbs %}
+	<div class="breadcrumbs">
+		{% for breadcrumb in breadcrumbs %}
+			<div>
+				{% if loop.last %}
+					<span class="last">{{ breadcrumb.text }}</span>
+				{% else %}
+					<a class="link" href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a>
+					<span>
+						/
+					</span>
+					<!-- Разделитель -->
+				{% endif %}
+			</div>
+		{% endfor %}
+	</div>
+{% endif %}
+<h2>Spichlerz - Tradycyjne jedzenie</h2>
+<div class="content">
+	<div class="block">
+		<h2>Producent przetworów</h2>
+		<p>Idealny producent przetworów to Spichlerz. Własne produkty sprzedawane w sklepie internetowym to najszybszy sposób na zapewnienie sobie dostawy zdrowych, starannie przygotowanych przetworów owocowych. Producent zadbał o to, by były one estetycznie zapakowane, dzięki czemu nadają się również na prezent. Spichlerz to gwarancja najwyższej jakości i smaku w każdej łyżeczce. Wśród różnorodności rodzajów przetworów owocowych, producent wybrał najbardziej popularne, zdrowe i smacznie: konfitury, syropy i cytryny w syropie. Spichlerz oferuje gwarantowaną jakość, na której zawsze można polegać. Dlatego kupując proponowane produkty, nie musisz się niczego obawiać. Z pewnością sprawdzą się one dobrze na niejednym stole, nie tylko codziennym, ale również świątecznym.</p>
+	</div>
+	<div class="block">
+		<h2>Syropy</h2>
+		<p>Syropy to kolejna duża kategoria pysznych produktów, które zadowolą niejedno podniebienie. Szczególnie warte uwagi są syropy do kawy. To one sprawiają, że zwykły, codzienny napój zyska niesamowity smak i wzbudzi zachwyt nawet najbardziej wybrednych osób poszukujących nowych walorów. W ofercie są syropy Monin, marki znanej i lubianej na polskim rynku. Syrop do kawy niejedno ma imię, dlatego spodziewać się można także mniej typowych połączeń, na przykład syropu malinowego do kawy bez mleka. Ta kategoria to również syrop malinowy do herbaty oraz syrop z cytryn,  świetny do lemoniady i różnego rodzaju deserów, w tym do nasączania biszkoptów do tortu. Wysoka jakość produktów jest odczuwalna już na pierwszy rzut oka.</p>
+	</div>
+	<div class="block">
+		<h2>Konfitury</h2>
+		<p>Domowe konfitury to coś, do czego wiele osób tęskni. Nierzadko są one najlepszym wspomnieniem z dzieciństwa. Pyszne, owocowe dżemy są przygotowywane z poszanowaniem dla naturalnego smaku owoców, z minimalną jedynie dawką cukru podkreślającą ich walory. Przykładem topowego produktu jest konfitura z malin. Świetna jako dodatek do naleśników, placków, kanapek, ale także do deserów albo herbaty. Konfitura malinowa ma mnóstwo walorów zdrowotnych, o których nie wolno zapominać. Jej głęboki smak pokochają młodsi i starsi. To nie jedyna zresztą propozycja konfitury w asortymencie. Sprawdź, jakie możesz wybrać. Wszystkie są zamknięte w estetycznym słoiku, z którego można zrobić słodki, wartościowy prezent na różne okazje. Domowe konfitury spotkają się z pewnością z wielką aprobatą.</p>
+	</div>
+	<div class="block">
+		<h2>Owoce w syropie</h2>
+		<p>Owoce w syropie to słodki, a przy tym naprawdę zdrowy deser, po który sięgać można częściej. Ich różnorodność przyprawić może o zawrót głowy. W tej kategorii znajdują się ulubione przetwory domowe. Sklep ma swoją ofertę rozszerzoną o takie produkty jak maliny w syropie, wiśnie w syropie, a także inne owoce, nierzadko w ciekawych połączeniach smakowych. Mają one różnorodne zastosowanie kulinarne, nie tylko w daniach słodkich i jako przekąska, ale także jako dodatek do dań wytrawnych, na przykład mięs. Ze względu na brak substancji konserwujących, naturalny smak nie jest niczym zaburzony. Owoce w syropie są ciekawą alternatywą dla dżemów i konfitur.
+			
+			Oferowane przez nas wyroby słyną z wyjątkowego aromatu i niezapomnianego smaku.  W taki sposób tworzymy markę, która zajmuję solidną pozycję na rynku. Nowoczesna linia produkcyjna daje nam możliwość konkurować na wielkich i wymagających rynkach Unii Europejskiej, z zachowaniem tradycji oraz największej ilości składników odżywczych w naszych wytworach.
+			
+			<br><br>Zapraszamy do próbowania. Smacznego!</p>
+	</div>
+</div>
+{{footer}}

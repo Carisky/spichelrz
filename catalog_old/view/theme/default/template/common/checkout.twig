@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Checkout Page</title>
+		<link href="catalog/view/theme/default/stylesheet/common/checkout.css" type="text/css" rel="stylesheet"/>
+	</head>
+	<body>
+		{{header}}
+		<main class="checkout-container">
+			<section class="checkout-form">
+				<h1>Twoje dane</h1>
+				<form id="checkout-form">
+					<div class="form-group">
+						<input type="text" id="first-name" placeholder="Imię *" required>
+					</div>
+					<div class="form-group">
+						<input type="text" id="last-name" placeholder="Nazwisko *" required>
+					</div>
+					<div class="form-group">
+						<input type="text" id="address" placeholder="Nazwa ulicy, numer budynku / numer lokalu *" required>
+					</div>
+					<div class="form-group">
+						<input type="text" id="zip-code" placeholder="Kod pocztowy *" required>
+					</div>
+					<div class="form-group">
+						<input type="text" id="city" placeholder="Miasto *" required>
+					</div>
+					<div class="form-group">
+						<input
+						type="hidden" id="country" value="176">
+						<!-- Польша (ID в OpenCart) -->
+						<input
+						type="hidden" id="zone" value="0">
+					<!-- Весь регион (0 или нужный ID) -->
+					</div>
+
+					<div class="form-group">
+						<input type="tel" id="phone" placeholder="Numer telefonu *" required>
+					</div>
+					<div class="form-group">
+						<input type="email" id="email" placeholder="Adres e-mail *" required>
+					</div>
+					<div class="form-group">
+						<input id="comment" placeholder="Komentarz do zamówienia"></input>
+				</div>
+			</form>
+		</section>
+
+		<section id="checkout-cart" class="checkout-cart">
+			<h2>Zawartość koszyka</h2>
+			<div id="checkout-list"><!-- Товары будут отрисованы через JS --></div>
+			<div class="summary">
+				<h3>Podsumowanie</h3>
+				<p id="total-price">Cena: 0 zł</p>
+				<p id="shipping-cost">Koszt przesyłki: 0 zł</p>
+				<p id="grand-total">Wszystko: 0 zł</p>
+
+				<div class="shipping_methods">
+					<h4>Wybierz sposób dostawy</h4>
+					{% for shipping in shipping_methods %}
+						<label>
+							<input type="radio" name="shipping_method" value="{{ shipping.code }}">
+							{{ shipping.title }}
+						</label>
+					{% endfor %}
+				</div>
+
+				<div class="payment_methods">
+					<h4>Wybierz sposób płatności</h4>
+					{% for payment in payment_methods %}
+						<label>
+							<input type="radio" name="payment_method" value="{{ payment.code }}">
+							{{ payment.title }}
+						</label>
+					{% endfor %}
+				</div>
+
+				<button onclick="submitOrder()" id="place-order">Kupuję i płacę</button>
+			</div>
+		</section>
+	</body>
+</html></main>{{footer}} 
+<script type="text/javascript" src="catalog/view/javascript/checkout/checkout.js"></script>
+<script type="text/javascript" src="catalog/view/javascript/checkout/order.js"></script>
+</body></html>

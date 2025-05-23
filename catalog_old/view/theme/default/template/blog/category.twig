@@ -1,0 +1,254 @@
+{{ header }}
+<style>
+.page-title {
+	font-family: 'Playfair Display';
+	font-style: normal;
+	font-weight: 700;
+	font-size: 58px;
+	line-height: 1;
+	margin-bottom: 20px;
+	text-transform: uppercase;
+  }
+  .blog-top {
+	margin-bottom: 113px;
+	max-width: 50%;
+  }
+@media (max-width: 1199px) {
+  .blog-top {
+    margin-bottom: 86px;
+  }
+}
+@media (max-width: 991px) {
+  .blog-top {
+    margin-bottom: 40px;
+  }
+}
+@media (max-width: 767px) {
+  .blog-top {
+    max-width: 48%;
+    margin-bottom: 20px;
+  }
+}
+@media (max-width: 600px) {
+  .blog-top {
+    max-width: 100%;
+    padding-right: 10%;
+  }
+}
+  .fww {
+	-webkit-flex-wrap: wrap;
+	-ms-flex-wrap: wrap;
+	flex-wrap: wrap;
+  }
+  .jcsb {
+	-webkit-box-pack: justify;
+	-webkit-justify-content: space-between;
+	-moz-box-pack: justify;
+	-ms-flex-pack: justify;
+	justify-content: space-between;
+  }
+  .blog-item {
+	width: 598px;
+	margin-left:auto;
+	margin-right:auto;
+	margin-top:10%
+  }
+@media (max-width: 1349px) {
+  .blog-item {
+    width: 520px;
+	margin-left:auto;
+	margin-right:auto;
+  }
+}
+@media (max-width: 1199px) {
+  .blog-item {
+    width: 430px;
+  }
+}
+@media (max-width: 991px) {
+  .blog-item {
+    width: 340px;
+  }
+}
+@media (max-width: 767px) {
+  .blog-item {
+    width: 48%;
+  }
+}
+@media (max-width: 600px) {
+  .blog-item {
+    margin: 30px 0;
+    width: 100%;
+  }
+}
+  .blog-item h4 {
+	font-family: 'Playfair Display';
+	font-weight: 700;
+	font-size: 28px;
+	line-height: 1.3;
+	text-transform: uppercase;
+  }
+  .posr {
+	position: relative;
+  }
+  .blog-item.odd {
+	transform: translateY(-300px);
+  }
+@media (max-width: 991px) {
+  .blog-item.odd {
+    transform: translateY(-236px);
+  }
+}
+@media (max-width: 767px) {
+  .blog-item.odd {
+    transform: translateY(-198px);
+  }
+}
+@media (max-width: 600px) {
+  .blog-item.odd {
+    transform: translateY(0);
+  }
+}
+  .blog-image {
+	padding-top: 124%;
+  }
+  .blog-image .inner {
+	border-radius: 60px;
+	overflow: hidden;
+  }
+  .blog-image img {
+	height: 100%;
+	width: 100%;
+	object-fit: cover;
+  }
+  .pp {
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	display: block;
+	z-index: 2;
+  }
+  .jcc, .checkbox > b {
+	-webkit-box-pack: center;
+	-webkit-justify-content: center;
+	-moz-box-pack: center;
+	-ms-flex-pack: center;
+	justify-content: center;
+  }
+  .aic, .checkbox > b {
+	-webkit-box-align: center;
+	-webkit-align-items: center;
+	-moz-box-align: center;
+	-ms-flex-align: center;
+	align-items: center;
+  }
+  .df, .checkbox > b {
+	display: -webkit-box;
+	display: -webkit-flex;
+	display: -moz-box;
+	display: -ms-flexbox;
+	display: flex;
+  }
+#blog, #blog-article {
+  margin-bottom: 220px;
+}
+@media (min-width: 768px) {
+  .bcontainer {
+    width: 750px;
+  }
+}
+@media (min-width: 992px) {
+  .bcontainer {
+    width: 970px;
+  }
+}
+@media (min-width: 1200px) {
+  .bcontainer {
+    width: 1170px;
+  }
+}
+@media (min-width: 1350px) {
+  .bcontainer {
+    width: 1300px;
+  }
+}
+@media (min-width: 1510px) {
+  .bcontainer {
+    width: 1486px;
+  }
+}
+.bcontainer {
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+/* .blog-wrapper {
+  padding-top: 160px;
+} */
+ @media (max-width: 1440px) {
+	.blog-row {
+	  max-width: 750px;
+	  margin: auto;
+	  max-width: 100vw;
+	}
+  }
+@media (max-width: 600px) {
+	.blog-row {
+	  max-width: 450px;
+	  margin: 0 auto;
+	}
+  }
+* {
+	box-sizing: border-box;
+	outline: 0 !important;
+	-webkit-tap-highlight-color: transparent !important;
+}
+img {max-width: 100%;}
+</style>
+<div id="blog" class="blog-wrapper bcontainer">
+	<div class="breadcrumbs df fww">
+    {% for breadcrumb in breadcrumbs %}
+		{% if loop.last %}
+		<span>{{ breadcrumb.text }}</span>
+		{% else %}
+		<a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a>
+		<i>/</i>
+		{% endif %}
+    {% endfor %}
+	</div>
+	<div class="blog-listing">
+		<div class="blog-top">
+			<h1 class="page-title">{{ heading_title }}</h1>
+			{% if description %}
+			<div class="blog-category-description">{{ description }}</div>
+			{% endif %}
+		</div>
+		{% if articles %}
+		<div class="blog-row df fww jcsb">
+			{% for article in articles %} 
+			<div class="blog-item posr {{ loop.index0 is odd ? 'odd' : 'even' }}">
+				<div class="blog-image posr">
+					<div class="inner posa pp df aic jcc">
+						<img src="{{ article.thumb }}" alt="{{ article.name }}">
+					</div>
+				</div>
+				<h4>{{ article.name }}</h4>
+				<a class="pp posa" href="{{ article.href }}"></a>
+			</div>
+			{% endfor %}
+		</div>
+		{{ pagination }}
+		{% else %}
+		<p>{{ text_empty }}</p>
+		{% endif %}
+		{{ content_top }}
+	</div>
+	{{ content_bottom }}
+	{{ column_right }}
+{{ column_left }}
+</div>
+{{ footer }}
+</body>
+</html>

@@ -1,0 +1,399 @@
+{{ header }}
+<style>
+	.cart-quantity {
+	border: none;
+	width: 150px;
+}
+.df, .checkbox > b, .radio > b {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+.checkout-profile .popup-input.w50 {
+  width: calc(50% - 10px);
+}
+.method {
+    padding: 0 18px;
+    margin-bottom: 8px;
+    font-size: 16px;
+    line-height: 20px;
+    color: #7D7D7D;
+    font-weight: 700;
+}
+.method .name {
+	width: 100%;
+}
+.method label {
+	padding: 22px 0;
+}
+.method .radio > b {
+    width: 16px;
+    height: 16px;
+    border-radius: 20px;
+	border: 1px solid #D8D5D5;
+    margin: 0 10px 0 5px;
+    flex-shrink: 0;
+}
+.method .radio input {
+    display: none;
+}
+.method .radio span .btn-map {
+    line-height: 1.2;
+    font-size: 14px;
+    display: none;
+    border-radius: 30px;
+    text-decoration: none;
+	font-weight: 400;
+	/*color: inherit;*/
+	margin: 15px;
+	padding: 15px;
+	background: #a68264;
+	color: #fff;
+}
+.method .radio b:before {
+    content: '';
+    display: block;
+    width: 15px;
+    height: 15px;
+    background-color: transparent;
+    border-radius: 8px;
+}
+.method .radio input:checked + b:before {
+    background-color: #161211;
+}
+.method .radio input:checked + b + span > .btn-map {
+    display: block;
+}
+.btn-map svg {
+    width: 12px;
+    height: 6px;
+    margin-left: 10px;
+    margin-bottom: 1px;
+}
+</style>
+
+<div id="checkout-checkout" class="page-wrapper container">
+	<h1 class="page-title" style="display:none;">{{heading_title}}</h1>
+	<form id="checkout">
+		<div class="checkout-cart">
+			<h2 class="checkout-block-title">{{text_cart}}</h2>
+			<table class="checkout-cart-rows">
+				<thead class="checkout-cart-header">
+					<tr>
+						<th class="header-name">Product</th>
+						<th class="header-qnt">Ilość</th>
+						<th class="header-price">Cena</th>
+						<th class="header-sum">Wartość</th>
+						<th class="header-del">Usunąć</th>
+					</tr>
+				</thead>
+				<tbody class="checkout-cart-list" data-cart>{{cart}}</tbody>
+			</table>
+		</div>
+		<div class="checkout-main df jcsb">
+			<div class="column left-col">
+				<h2 class="checkout-block-title df aic"><span>01</span>{{text_your_details}}</h2>
+				<div class="checkout-profile" data-address>{{address}}</div>
+				{% if free_shipping > 0 %}
+				<div class="shipping-header posr">
+					<h2 class="column checkout-block-title df aic"><span>02</span>{{text_shipping_method}}</h2>
+					<div class="free-shipping df">
+						<div class="description">
+							<span>Dodaj jeszcze do koszyka produkty o wartości min. {{free_shipping}}<span class="currency-symbol">{{currency_symbol}}</span>, a otrzymasz darmową dostawę</span>
+						</div>
+						<div class="value df fdc aic jcc ">
+							<div class="title">Darmowa<br>dostawa od</div>
+							<div class="sum">{{free_shipping}}<span class="currency-symbol">{{currency_symbol}}</span></div>
+						</div>
+					</div>
+				</div>
+				{% else %}
+				<h2 class="column checkout-block-title df aic"><span>02</span>{{text_shipping_method}}</h2>
+				{% endif %}
+				<div class="checkout-shipping" data-shipping>{{shipping}}</div>
+			</div>
+			<div class="column right-col">
+				
+				<h2 class="column checkout-block-title df aic"><span>03</span>{{text_payment_method}}</h2>
+				<div class="checkout-payment" data-payment>{{payment}}</div>
+				<h2 class="column checkout-block-title df aic"><span>04</span>{{text_totals}}</h2>
+				<div class="checkout-codes">
+				 {{coupon}} 
+				<!-- {{reward}} -->
+				</div>
+				<div class="checkout-totals" data-totals>{{totals}}</div>
+				<div class="form-block" data-error="agree">
+					<label class="checkbox large-box df small-text">
+						<input type="checkbox" name="agree" value="1"{{agree ? ' checked'}}>
+						<b></b>
+						<div>Zapoznałem się i akceptuję Regulamin Sklepu Internetowego, Politykę Prywatności w celu realizacji zamówienia. *</div>
+					</label>
+					<div class="form-error"></div>
+				</div>
+				<div class="confirm df jce">
+					<button type="button" class="btn df aic jcc" onclick="save()">
+						Zamawiam
+					</button>
+				</div>
+			</div>
+		</div>
+	</form>
+	<div id="payment" style="display:none;"></div>
+	<input id="inpostPointSelected" style="display:none;" type="hidden" value="0"/>
+</div>
+{{ footer }}
+
+{% if map_key %}
+<script src="catalog/view/theme/default/js/inpost.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ map_key }}&callback=initMap"></script>
+<script src="https://unpkg.com/@googlemaps/markerclusterer/dist/index.min.js"></script>
+
+{% set geoWidgetToken = 'eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJzQlpXVzFNZzVlQnpDYU1XU3JvTlBjRWFveFpXcW9Ua2FuZVB3X291LWxvIn0.eyJleHAiOjIwNTY3MTc1NjcsImlhdCI6MTc0MTM1NzU2NywianRpIjoiNjFlYTU4MzItNWZjNi00NDUxLTk3N2YtNTMzYjhiY2Y3NTYwIiwiaXNzIjoiaHR0cHM6Ly9sb2dpbi5pbnBvc3QucGwvYXV0aC9yZWFsbXMvZXh0ZXJuYWwiLCJzdWIiOiJmOjEyNDc1MDUxLTFjMDMtNGU1OS1iYTBjLTJiNDU2OTVlZjUzNTpiNmY4cEM5ZXNpS1l5YzZpOS1tWHV2eXd6M2dLOURBb0xBOS1SX0t4dXVVIiwidHlwIjoiQmVhcmVyIiwiYXpwIjoic2hpcHgiLCJzZXNzaW9uX3N0YXRlIjoiODdmMzBhMmEtMTVmNS00MzA4LTg2YTQtNWFlZmNhZmY2MDA0Iiwic2NvcGUiOiJvcGVuaWQgYXBpOmFwaXBvaW50cyIsInNpZCI6Ijg3ZjMwYTJhLTE1ZjUtNDMwOC04NmE0LTVhZWZjYWZmNjAwNCIsImFsbG93ZWRfcmVmZXJyZXJzIjoic3BpY2hsZXJ6MjQucGwiLCJ1dWlkIjoiZTE2NGQ4OWYtZDJmMS00MmQwLTg3MTMtOWUwMmM1MjQ5ZTZmIn0.U_7O1HUjHcHUflbo90tZtJsdDK1-8nKjWw4jtjn-Yp68vdb39pzzQsAAGLMkvNIfxnKC0Gft9XvXEBby318CWXGYTFqG7usdu1Vte7YY6l6voaqSNSQYIs08GIinrdhR1w6K7qwxmakJ1vRpDFSr9fn79xdpsbM6LgmYi4GL8qNeevnkb-Sa1ULKVIU87Eoe0bvvTb7gRf1ldI5pswAjkKwbjTK2166YwdnR1HLoPd1KjJnqrHX9R4hCu_UolhV8OgiNQjLVhQ_FyNDjuJCudbik2VC4lZda9cesvVNXc8cKXzx7Vb3f1uZMNPjvtYGJNnhaorGSLNxvqHkNMsXJPw'  %}
+
+<div class="modal fade" id="inpostGeoWidgetModal" tabindex="-1" role="dialog">
+    
+</div>
+{% if inpostSandbox %}
+    {% set geoWidgetUrl = 'https://sandbox-easy-geowidget-sdk.easypack24.net' %}
+{% else %}
+    {% set geoWidgetUrl = 'https://geowidget.inpost.pl' %}
+{% endif %}
+<link rel="stylesheet" href="{{ geoWidgetUrl }}/inpost-geowidget.css" />
+<script src="{{ geoWidgetUrl }}/inpost-geowidget.js" defer></script>
+
+{% endif %}
+
+<script>
+//$( document ).ready(function() {
+//	if ($.cookie("txtcard")!=undefined) $('textarea[name=comment]').val('Tekst do kartki: '+$.cookie("txtcard"));
+//});
+
+	function saveCoupon() {
+		$(document).find('[data-error="coupon"]').removeClass('input-error').find('.form-error').text('').hide();
+		$('body').append(loader);
+		$.ajax({
+			url: 'index.php?route=checkout/buy/save_coupon',
+			type: 'post',
+			dataType: 'json',
+			data: {
+				coupon: $(document).find('[name="coupon"]').val(),
+			},
+			success: function(json) {
+				$('#loader').remove();
+				if (json.error)  $(document).find('[data-error="coupon"]').addClass('input-error').find('.form-error').text(json.error).show();
+				if (json.success) nrShowMessage(json.success, 1);
+			},
+			error: function(data) {
+				$('#loader').remove();
+				console.log(data.responseText);
+			}
+		});
+	}
+	
+	function saveReward() {
+		$(document).find('[data-error="reward"]').removeClass('input-error').find('.form-error').text('').hide();
+		$('body').append(loader);
+		$.ajax({
+			url: 'index.php?route=checkout/buy/save_reward',
+			type: 'post',
+			dataType: 'json',
+			data: {
+				reward: $(document).find('[name="reward"]').val(),
+			},
+			success: function(json) {
+				$('#loader').remove();
+				if (json.error)  $(document).find('[data-error="reward"]').addClass('input-error').find('.form-error').text(json.error).show();
+				if (json.success) {
+					$(document).find('[data-points]').text(json.reward);
+					nrShowMessage(json.success, 1);
+				}
+			},
+			error: function(data) {
+				$('#loader').remove();
+				console.log(data.responseText);
+			}
+		});
+	}
+	
+	function cartUpdate() {
+		$('body').append(loader);
+		$.ajax({
+			url: 'index.php?route=checkout/buy/refresh_cart',
+			type: 'post',
+			dataType: 'json',
+			success: function(json) {
+				console.log(json);
+				$('#loader').remove();
+				checkJson(json);
+				$('[data-cart]').html(json.cart);
+				$('[data-shipping]').html(json.shipping);
+				$('[data-payment]').html(json.payment);
+				$('[data-totals]').html(json.totals);
+			},
+			error: function(data) {
+				$('#loader').remove();
+				console.log(data.responseText);
+			}
+		});
+	}
+	
+	function save() {
+		$(document).find('[data-error]').removeClass('input-error').find('.form-error').text('').hide();
+		if (( $("#inpostPointSelected").val()==0 ) && ( $(document).find('[data-modal-map]').css('display')=='block' ) ) {
+			alert("Wybierz paczkomat!");
+		} else {
+			$('body').append(loader);
+			$.ajax({
+				url: 'index.php?route=checkout/buy/save_order',
+				type: 'post',
+				dataType: 'json',
+				data: $('#checkout').serialize(),
+				success: function(json) {
+					$('#loader').remove();
+					//$.removeCookie("txtcard");
+					checkJson(json);
+					if(json.error) {
+						$.each(json.error, function(i, v){
+							$('[data-error="'+i+'"]').addClass('input-error').find('.form-error').text(v).show();
+						});
+					} else if(json.payment) {
+						try { $('#payment').html(json.payment).find('#button-confirm').click(); } catch (e) {}
+						try { $('#payment').html(json.payment).find('.js-bluepayment-confirm').click(); } catch (e) {}
+						// try {
+						//  	if ($('#payment').html(json.payment).find('.js-bluepayment-confirm').length>0) {
+						// 		window.location.href = 'index.php?route=extension/payment/bluepayment/processCheckout';
+						//  	}
+						// } catch (e) {}
+					} else {
+						console.log(json);
+					}
+				},
+				error: function(data) {
+					$('#loader').remove();
+					console.log(data.responseText);
+				}
+			});
+		}
+
+	}
+	
+	$('[data-address]').on('change', '#input-address', function() {
+		$('body').append(loader);
+		$.ajax({
+			url: 'index.php?route=checkout/buy/change_address&address_id='+$(this).val(),
+			dataType: 'json',
+			success: function(json) {
+				$('#loader').remove();
+				checkJson(json);
+				$('[data-address]').html(json.address);
+				NiceSelect.bind(document.getElementById('input-address'));
+				NiceSelect.bind(document.getElementById('input-zone'));
+				$('[data-shipping]').html(json.shipping);
+				$('[data-payment]').html(json.payment);
+				$('[data-totals]').html(json.totals);
+			},
+			error: function(data) {
+				$('#loader').remove();
+				console.log(data.responseText);
+			}
+		});
+	});
+	
+	$('[data-address]').on('change', '#input-zone', function() {
+		$('[data-address]').find('[name="address[city]"]').val('');
+		$('[data-address]').find('[name="address[address_1]"]').val('');
+		$('[data-address]').find('[name="address[postcode]"]').val('');
+		$('body').append(loader);
+		$.ajax({
+			url: 'index.php?route=checkout/buy/change_zone&zone_id='+$(this).val(),
+			dataType: 'json',
+			success: function(json) {
+				$('#loader').remove();
+				checkJson(json);
+				$('[data-shipping]').html(json.shipping);
+				$('[data-payment]').html(json.payment);
+				$('[data-totals]').html(json.totals);
+			},
+			error: function(data) {
+				$('#loader').remove();
+				console.log(data.responseText);
+			}
+		});
+	});
+	
+	$('[data-shipping]').on('change', 'input', function() {
+		$('body').append(loader);
+		$.ajax({
+			url: 'index.php?route=checkout/buy/change_shipping&code='+$(this).filter(':checked').val(),
+			dataType: 'json',
+			success: function(json) {
+				$('#loader').remove();
+				checkJson(json);
+				$('[data-payment]').html(json.payment);
+				$('[data-totals]').html(json.totals);
+				$('body').append(json.s);
+			},
+			error: function(data) {
+				$('#loader').remove();
+				console.log(data.responseText);
+			}
+		});
+	});
+	
+	$('[data-payment]').on('change', 'input', function() {
+		$.ajax({
+			url: 'index.php?route=checkout/buy/change_payment&code='+$(this).filter(':checked').val(),
+			error: function(data) {
+				$('#loader').remove();
+				console.log(data.responseText);
+			}
+		});
+	});
+	
+	if(typeof(button) != 'function') {
+		$.fn.button = function(s){return;}
+	}
+	
+	$(document).on('click', '[data-qnt-btn]', function(){
+		var th = $(this),
+			b = th.parents('[data-quantity]'),
+			i = b.find('input'),
+			v = parseInt(i.val());
+		if(th.data('qnt-btn') > 0) {
+			v++;
+			if(b.is('[data-max]') && b.data('max') > 0 && v > b.data('max')) return false;
+		} else {
+			if(v < 2) return false;
+			v = v - 1;
+			if(b.is('[data-min]') && v < b.data('min')) return false;
+		}
+		i.val(v);
+		if(th.parents('[data-cart-item]').length) cart.update(b.data('cart'), v);
+		if(typeof(cartUpdate) == 'function') cartUpdate(b.parents('[data-product]'), v);
+	});
+
+	$(document).on('input', '[data-input-quantity]', function(){
+		var th = $(this),
+			b = th.parents('[data-quantity]'),
+			v = parseInt(th.val());
+		if(b.is('[data-min]') && v < b.data('min')) th.val(b.data('min'));
+		if(b.is('[data-max]') && b.data('max') > 0 && v > b.data('max')) th.val(b.data('max'));
+		if(th.parents('[data-cart-item]').length) cart.update(b.data('cart'), v);
+		if(typeof(cartUpdate) == 'function') cartUpdate(b.parents('[data-product]'), v);
+	});
+
+	function checkJson(json) {
+		if(json.redirect == 1) {
+			document.location.reload();
+		} else if(json.redirect) {
+			window.location.href = json.redirect;
+		}
+		if(json.warning) nrShowMessage(json.warning);
+		if(json.log) console.log(json.log);
+	}
+
+</script>
+</body>
+</html>

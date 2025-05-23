@@ -1,0 +1,42 @@
+<head>
+	<link href="catalog/view/theme/default/stylesheet/common/breadcrumbs.css" type="text/css" rel="stylesheet"/>
+	<link href="catalog/view/theme/default/stylesheet/common/faq.css" type="text/css" rel="stylesheet"/>
+</head>
+
+{{header}}
+
+{% if breadcrumbs %}
+	<div class="breadcrumbs">
+		{% for breadcrumb in breadcrumbs %}
+			<div>
+				{% if loop.last %}
+					<span class="last">{{ breadcrumb.text }}</span>
+				{% else %}
+					<a class="link" href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a>
+					<span>
+						/
+					</span>
+					<!-- Разделитель -->
+				{% endif %}
+			</div>
+		{% endfor %}
+	</div>
+{% endif %}
+
+<div class="content">
+
+
+	<div class="block">
+		<h2>Jaki jest termin realizacji zamówienia?</h2>
+		<p>Zamówienia staramy sie wysyłać na bieżąco – zazwyczaj tego samego lub następnego dnia po otrzymaniu płatności. W sporadycznych przypadkach lub nietypowych zamówieniach maksymalny termin realizacji to 14 dni od zaksięgowania wpłaty.</p>
+	</div>
+	<div class="block">
+		<h2>Produkty pakowane są w szklane słoiki, czy w związku z tym paczka dotrze w całości?</h2>
+		<p>Proszę się nie obawiać. Nasz doświadczony zespół pracowników bardzo starannie dba o zapakowanie towaru. Ponadto paczki oznaczone są informacją: “ostrożnie szkło”, dzięki czemu firma kurierska zapewnia bezpieczny transport do każdego klienta.</p>
+	</div>
+	<div class="block">
+		<h2>Jaki jest termin przydatności do spożycia produktów Spichlerz?</h2>
+		<p>Data miniamlnej trwałości owoców w syropie i syropów wynosi 12 miesiące, natomiast żurek i barszcz 6 miesięcy.</p>
+	</div>
+</div>
+{{footer}}

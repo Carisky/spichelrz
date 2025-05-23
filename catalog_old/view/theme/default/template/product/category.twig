@@ -1,0 +1,178 @@
+{{ header }}
+{{test_var}}
+<div class="shop">
+	{% if breadcrumbs %}
+		<div class="breadcrumbs">
+			{% for breadcrumb in breadcrumbs %}
+				<div>
+					{% if loop.last %}
+						<span class="last">{{ breadcrumb.text }}</span>
+					{% else %}
+						<a class="link" href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a>
+						<span>/</span>
+					{% endif %}
+				</div>
+			{% endfor %}
+		</div>
+	{% endif %}
+
+
+	<div class="title">Sklep</div>
+
+	<div class="sorters">
+		<div class="sorter">
+			<div class="dropdown">
+				<div class="dropdown-trigger">
+					<img src="image/catalog/assets/categories_ico.svg" alt="Kategorie produktów"/>
+					<span class="trigger-text">Kategorie produktów</span>
+				</div>
+				<div class="dropdown-menu">
+					<div class="dropdown-item" data-href="">Kategorie produktów</div>
+					{% for category in categories %}
+						<div class="dropdown-item" data-href="{{ category.href }}">{{ category.name }}</div>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+
+		<div class="sorter">
+			<div class="dropdown">
+				<div class="dropdown-trigger">
+					<img src="image/catalog/assets/sorting_ico.svg" alt="Sortowanie"/>
+					<span id="param-sorter-text" class="trigger-text">Sortowanie</span>
+				</div>
+				<div class="dropdown-menu">
+					{% for sort_option in sorts %}
+						<div class="dropdown-item" data-value="{{ sort_option.value }}" {% if sort_option.value == sort %} class="selected" {% endif %}>
+							{{ sort_option.text }}
+						</div>
+					{% endfor %}
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+</div>
+
+
+<div id="products-list" class="products-list">
+  
+</div>
+
+<div id="pagination" class="pagination">{{ pagination }}</div>
+
+<div class="additional">
+	<div class="block">
+		{{description}}
+	</div>
+</div></div> <script>
+	document.addEventListener("DOMContentLoaded", function() {
+	    // Получаем путь из URL, например: "/owoce-w-syropie"
+	    var path = window.location.pathname;
+	    // Разбиваем путь по "/" и отфильтровываем пустые элементы
+	    var segments = path.split('/').filter(function(segment) {
+	        return segment.length > 0;
+	    });
+	    if (segments.length > 0) {
+	        // Берём последний сегмент, который содержит имя категории
+	        var lastSegment = segments[segments.length - 1];
+	        // Заменяем тире (и возможные подчеркивания) на пробелы
+	        var formattedText = lastSegment.replace(/[-_]+/g, ' ');
+	        // Делаем первую букву заглавной
+	        formattedText = formattedText.charAt(0).toUpperCase() + formattedText.slice(1);
+	
+	        // Ищем триггер для категории по alt у изображения
+	        var categoryImage = document.querySelector('.dropdown-trigger img[alt="Kategorie produktów"]');
+	        if (categoryImage) {
+	            var triggerTextElem = categoryImage.parentElement.querySelector('.trigger-text');
+	            if (triggerTextElem) {
+	                triggerTextElem.textContent = formattedText;
+	            }
+	        }
+	    }
+	
+	
+		    // Получаем параметр сортировки из URL
+	    const urlParams = new URLSearchParams(window.location.search);
+	    const sortParam = urlParams.get('sort');
+	    const sorterTextElem = document.getElementById('param-sorter-text');
+	
+	    if (sortParam && sorterTextElem) {
+	        let displayText = '';
+	        switch (sortParam) {
+	            case 'popularity':
+	                displayText = 'popularność';
+	                break;
+	            case 'rating':
+	            case 'rating-DESC':
+	                displayText = 'ocena ↓';
+	                break;
+	            case 'rating-ASC':
+	                displayText = 'ocena ↑';
+	                break;
+	            case 'newest':
+	                displayText = 'najnowsze';
+	                break;
+	            case 'p.price-ASC':
+	                displayText = 'cena ↑';
+	                break;
+	            case 'p.price-DESC':
+	                displayText = 'cena ↓';
+	                break;
+	            case 'pd.name-ASC':
+	                displayText = 'A<Z';
+	                break;
+	            case 'pd.name-DESC':
+	                displayText = 'Z>A';
+	                break;
+	            case 'p.model-ASC':
+	                displayText = 'model A<Z';
+	                break;
+	            case 'p.model-DESC':
+	                displayText = 'model Z>A';
+	                break;
+	            default:
+	                displayText = 'Sortowanie';
+	        }
+	        sorterTextElem.textContent = displayText;
+	    }
+	});
+	
+	
+	  document.addEventListener('click', function(e) {
+	    // Если клик произошёл по триггеру — переключаем видимость меню
+	    const trigger = e.target.closest('.dropdown-trigger');
+	    if (trigger) {
+	      const dropdown = trigger.parentElement;
+	      const menu = dropdown.querySelector('.dropdown-menu');
+	      // Переключаем отображение меню
+	      menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+	    } else {
+	      // Если клик вне dropdown — скрываем все меню
+	      document.querySelectorAll('.dropdown-menu').forEach(menu => {
+	        menu.style.display = 'none';
+	      });
+	    }
+	  });
+	
+	  // Обработка кликов по элементам выпадающего списка
+	  document.querySelectorAll('.dropdown-item').forEach(item => {
+	    item.addEventListener('click', function() {
+	      // Если элемент имеет data-href — переходим по ссылке
+	      const href = this.getAttribute('data-href');
+	      if (href !== null && href !== '') {
+	        window.location.href = href;
+	      }
+	      // Если есть data-value, обновляем сортировку через URL-параметр sort
+	      const value = this.getAttribute('data-value');
+	      if (value !== null && value !== '') {
+	        const url = new URL(window.location.href);
+	        url.searchParams.set('sort', value);
+	        window.location.href = url.toString();
+	      }
+	    });
+	  });
+	
+	  
+	</script>{{ footer }}

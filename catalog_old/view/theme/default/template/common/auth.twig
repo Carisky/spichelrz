@@ -1,0 +1,57 @@
+<head>
+    <link href="catalog/view/stylesheet/common/auth.css" type="text/css" rel="stylesheet"/>
+</head>
+
+{{header}}
+<main class="auth-container">
+    <div class="auth-forms">
+        <!-- Форма входа -->
+        <section class="login-form">
+            <h2>Login</h2>
+            <form action="{{ action_login }}" method="post">
+                <label for="email">Email:</label>
+                <input type="email" name="email" id="email" required>
+
+                <label for="password">Password:</label>
+                <input type="password" name="password" id="password" required>
+
+                <button type="submit">Login</button>
+
+                <p><a href="{{ forgot_password }}">Forgot Password?</a></p>
+            </form>
+        </section>
+
+<!-- Форма регистрации -->
+        <section class="register-form">
+            <h2>Register</h2>
+            <form action="{{ action_register }}" method="post">
+                <label for="firstname">First Name:</label>
+                <input type="text" name="firstname" id="firstname" required>
+
+                <label for="lastname">Last Name:</label>
+                <input type="text" name="lastname" id="lastname" required>
+
+                <label for="reg_email">Email:</label>
+                <input type="email" name="email" id="reg_email" required>
+
+                <label for="telephone">Telephone:</label>
+                <input type="text" name="telephone" id="telephone" required>
+
+                <label for="reg_password">Password:</label>
+                <input type="password" name="password" id="reg_password" required>
+
+                <label for="confirm_password">Confirm Password:</label>
+                <input type="password" name="confirm_password" id="confirm_password" required>
+
+                <!-- Согласие с условиями -->
+                <label>
+                    <input type="checkbox" name="agree" required>
+                    I agree to the <a href="{{ terms_and_conditions_link }}">terms and conditions</a>
+                </label>
+
+                <button type="submit">Register</button>
+            </form>
+        </section>
+    </div>
+</main>
+{{footer}}

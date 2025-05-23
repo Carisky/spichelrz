@@ -1,0 +1,33 @@
+{{ header }}
+<div id="account-login" class="container">
+	<div class="row">
+		<div class="col mb-3">
+			<div class="border rounded p-3 d-flex flex-column h-100">
+				<form id="form-login" action="{{ action }}" method="post" data-oc-toggle="ajax">
+					<h2>ZALOGUJ SIĘ</h2>
+					<p>WITAMY Z POWROTEM DO NAS</p>
+					<div class="form-group">
+						<input type="text" name="email" value="{{ email }}" placeholder="{{ entry_email }}" id="input-email" class="form-control"/>
+					</div>
+					<div class="form-group">
+						<input type="password" name="password" value="{{ password }}" placeholder="{{ entry_password }}" id="input-password" class="form-control mb-1"/>
+					</div>
+
+					<div class="text-end">
+						<button type="submit">{{ button_login }}</button>
+					</div>
+					{% if redirect %}
+						<input type="hidden" name="redirect" value="{{ redirect }}"/>
+					{% endif %}
+				</form>
+				<br>
+				<div class="text-center mt-3">
+					<a class="btn" href="{{ register }}" >Zarejestruj sie</a>
+					&nbsp;&nbsp;&nbsp;
+					<a class="btn" href="/index.php?route=account/forgotten" >Nie pamiętasz hasła?</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{{ footer }}

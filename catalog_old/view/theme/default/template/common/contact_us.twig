@@ -1,0 +1,51 @@
+
+{{header}}
+<div class="contact-us">
+
+	{% if breadcrumbs %}
+		<div class="breadcrumbs">
+			{% for breadcrumb in breadcrumbs %}
+				<div>
+					{% if loop.last %}
+						<span class="last">{{ breadcrumb.text }}</span>
+					{% else %}
+						<a class="link" href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a>
+						<span>/</span>
+					{% endif %}
+				</div>
+			{% endfor %}
+		</div>
+	{% endif %}
+	<main>
+		<div class="left">
+			<div class="title">
+				<p class="first">Masz</p>
+				<p class="second">pytania?</p>
+			</div>
+			<form class="contact-form">
+				<div class="form-row">
+					<input type="text" name="first_name" placeholder="Imię" required>
+					<input type="text" name="last_name" placeholder="Nazwisko" required>
+				</div>
+				<div class="form-row">
+					<input type="email" name="email" placeholder="Email" required>
+					<input type="text" name="theme" placeholder="Temat" required>
+				</div>
+				<div class="form-row">
+					<textarea name="message" placeholder="Wiadomość" rows="4" required></textarea>
+				</div>
+				<button type="submit" class="submit-btn">Wyślij</button>
+			</form>
+		</div>
+		<div class="right">
+            <div class="data-list">
+                <div class="data-row">Nasze dane</div>
+                <div class="data-row"><span>Adres:</span> Poland, woj. Małopolskie, Kraków, ul. Wrobela 5</div>
+                <div class="data-row"><span>Zamówienia hurtowe:</span> +48 502 879 474</div>
+                <div class="data-row"><span>Biuro:</span> +48 452 329 827</div>
+                <div class="data-row"><span>Email:</span> spichlerz24@gmail.com oraz biuro@spichlerz24.pl</div>
+            </div>
+        </div>
+	</main>
+</div>
+{{footer}}

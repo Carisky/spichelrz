@@ -1,0 +1,50 @@
+<head>
+    <link href="catalog/view/theme/default/stylesheet/common/breadcrumbs.css" type="text/css" rel="stylesheet"/>
+    <link href="catalog/view/theme/default/stylesheet/common/work_with_us.css" type="text/css" rel="stylesheet"/>
+</head>
+
+{{ header }}
+<div class="work-with-us">
+    {% if breadcrumbs %}
+    <div class="breadcrumbs">
+        {% for breadcrumb in breadcrumbs %}
+        <div>
+            {% if loop.last %}
+            <span class="last">{{ breadcrumb.text }}</span>
+            {% else %}
+            <a class="link" href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a>
+            <span>/</span>
+            <!-- Разделитель -->
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="content" style="display: block;">
+        <p class="content-title">Korzyści ze współpracy z nami</p>
+        <div class="list">
+            <div class="block">
+                <img src="image/catalog/assets/smiling_man.svg"/>
+                <p class="title">Produkcja własna</p>
+                <p class="text">Jesteśmy producentem, co gwarantuje szybkie rozwiązywanie wszelkich problemów</p>
+            </div>
+            <div class="block">
+                <img src="image/catalog/assets/coin.svg"/>
+                <p class="title">Oszczędzasz na kosztach dostawy</p>
+                <p class="text">Darmowa wysyłka już dla nieco większych zamówień</p>
+            </div>
+            <div class="block">
+                <img src="image/catalog/assets/storage.svg"/>
+                <p class="title">Brak minimum logistycznego</p>
+                <p class="text">Zamawiasz tylko to, co chcesz, ile chcesz i kiedy potrzebujesz – bez zamrażania pieniędzy.</p>
+            </div>
+            <div class="block">
+                <img src="image/catalog/assets/courier2.svg"/>
+                <p class="title">Szybka dostawa. Nawet w 24h</p>
+                <p class="text">Wszystkie produkty zamawiasz od producenta</p>
+            </div>
+        </div>
+    </div>
+</div>
+{{ footer }}

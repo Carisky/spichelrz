@@ -1,0 +1,464 @@
+{% if redirect %}
+	 <script>
+									var redi = '{{redirect}}';
+									//window.location.href = '{{redirect}}';
+								</script>
+	{% if logged %}
+
+		{% else %}
+
+			<h2>Zaloguj się lub zarejestruj</h2>
+			<div class="wholsale-auth-wrapper">
+				<div class="popup-bottomRegister" style="display: inline-block; margin-bottom:10px">
+					<a class="icon-wrap account-icon df aic jcc ta2" href="/login" style="width:250px" data-fancybox>
+						<svg>
+							<use xlink:href="/catalog/view/theme/default/image/sprite.svg#user"></use>
+						</svg>&nbsp;
+						<h3>Zaloguj się</h3>
+					</a>
+				</div>
+				<div class="popup-bottomRegister" style="display: inline-block; margin-bottom:10px">
+					<a class="icon-wrap account-icon df aic jcc ta2" href="/register" style="width:250px" data-fancybox="" data-close-popup="">
+						<svg>
+							<use xlink:href="/catalog/view/theme/default/image/sprite.svg#user"></use>
+						</svg>&nbsp;
+						<h3>Zarejestruj się</h3>
+					</a>
+				</div>
+			</div>
+	{% endif %}
+{% else %}
+	<style>
+		.checkout-payment {
+			margin-left: 20%;
+		}
+		.total-item {
+			margin-left: 20%;
+		}
+		.shipping-info {
+			margin-left: 20%;
+		}
+		.shipping-info .df {
+			display: -webkit-box;
+			display: -webkit-flex;
+			display: -moz-box;
+			display: -ms-flexbox;
+			display: flex;
+		}
+	</style>
+
+	<form id="wholesale">
+		<h2 class="product-title3">Twoje dane</h2>
+		<div class="wholesale-customer-data df jcsb">
+			<div class="column left">
+				<h3>Podstawowe dane</h3>
+				{% if addresses %}
+					<div class="form-block" data-error="address_id">
+						<select name="address[address_id]" id="input-address" data-nice-select>
+							<option value="" disabled {{ not address.address_id ? ' selected'}}>
+								--- Wybierz adres ---
+							</option>
+							{% for item in addresses %}
+								<option value="{{ item.address_id }}" {{ item.address_id == address.address_id ? ' selected'}}>{{ item.city }},
+									{{ item.address_1 }}</option>
+							{% endfor %}
+						</select>
+						<div class="form-error"></div>
+					</div>
+				{% else %}
+					<input type="hidden" name="address[address_id]" value="0">
+				{% endif %}
+				<div class="form-block" data-error="firstname">
+					<input type="text" name="address[firstname]" value="{{ address.firstname }}" placeholder="{{ entry_firstname }}">
+					<div class="form-error"></div>
+				</div>
+				<div class="form-block" data-error="lastname">
+					<input type="text" name="address[lastname]" value="{{address.lastname }}" placeholder="{{entry_lastname }}">
+					<div class="form-error"></div>
+				</div>
+				<div class="form-block" data-error="email">
+					<input type="email" name="address[email]" value="{{address.email}}" placeholder="{{ entry_email_address }}"/>
+					<div class="form-error"></div>
+				</div>
+				<div class="form-block" data-error="telephone">
+					<input type="text" name="address[telephone]" value="{{address.telephone}}" placeholder="{{ entry_telephone }}"/>
+					<div class="form-error"></div>
+				</div>
+				<div class="form-block" data-error="company">
+					<input type="text" name="address[company]" value="{{address.company}}" placeholder="{{ entry_company }}" id="input-shipping-company"/>
+					<div class="form-error"></div>
+				</div>
+				<div class="form-block" data-error="nip">
+					<input type="text" name="address[nip]" value="{{address.nip}}" placeholder="NIP" id="input-shipping-nip" inputmode="numeric" pattern="[0-9]*" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'');"/>
+					<div class="form-error"></div>
+				</div>
+
+			</div>
+			<div class="column right">
+				<h3>Dane do wysyłki</h3>
+				<!-- <div class="form-block" data-error="address_1">
+																													<div class="textarea-wrapper">
+																														<textarea name="address[address_1]" class="form-control shipping">{{address.address_1}}</textarea>
+																													</div>
+																												</div> -->
+				<div class="form-block" data-error="address_1">
+					<input type="text" name="address[address_1]" value="{{address.address_1}}" placeholder="{{ entry_address_1 }}"/>
+					<div class="form-error"></div>
+				</div>
+				<div class="form-block" data-error="city">
+					<input type="text" name="address[city]" value="{{address.city}}" placeholder="{{ entry_city }}"/>
+					<div class="form-error"></div>
+				</div>
+				<div class="form-block" data-error="postcode">
+					<input type="text" name="address[postcode]" value="{{address.postcode}}" placeholder="{{ entry_postcode }}"/>
+					<div class="form-error"></div>
+				</div>
+
+
+				<h3>Komentarz do zamówienia</h3>
+				<div class="form-block">
+					<div class="textarea-wrapper">
+						<textarea name="address[comment]" class="form-control comment{{addresses ? ' tall'}}">{{address.comment}}</textarea>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="wholesale-products">
+			{% for category in categories %}
+				<h2 class="product-title3">{{category.name}}</h2>
+				<div class="product-list">
+					<table>
+						<thead>
+							<tr>
+								<th>Okładka</th>
+								<th class="name">Nazwa produktu</th>
+								<th>Ilość opakowań zbiorczych</th>
+								<th>Sztuk w opakowaniu</th>
+								<th>Suma</th>
+								<th>Cena</th>
+								<th>Wszystko</th>
+								<th>Status</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for product in category.products %}
+								<tr class="mobile-item aic" style="display:none !important;" data-mobile-product="{{product.product_id}}">
+									<td class="trigger" data-product-trigger>
+										<svg class="ta">
+											<use xlink:href="/catalog/view/theme/default/image/sprite.svg#trigger"></use>
+										</svg>
+									</td>
+									<td class="mobile-image">
+										<img src="{{product.thumb}}" alt="">
+									</td>
+									<td class="mobile-name">{{product.name}}</td>
+									<td class="mobile-mark">
+										<div class="buy-mark{{cart_products[product.product_id].packs ? ' active'}} ta posr" data-mark>
+											<svg class="posa">
+												<use xlink:href="/catalog/view/theme/default/image/sprite.svg#check"></use>
+											</svg>
+										</div>
+									</td>
+								</tr>
+								<tr class="product-row" data-product="{{product.product_id}}" data-price="{{product.price_abs}}">
+									<input type="hidden" name="product[{{product.product_id}}][product_id]" value="{{product.product_id}}">
+									<input type="hidden" name="product[{{product.product_id}}][price]" value="{{product.price}}">
+									<td class="image">
+										<img src="{{product.thumb}}" alt="">
+									</td>
+									<td class="name">
+										{{product.name}}
+									</td>
+									<td class="packs">
+										<div class="mobile-label">Ilość opakowań zbiorczych</div>
+										<div class="cart-quantity df" data-quantity data-min="{{ product.minimum }}" data-max="0">
+											<a href="javascript:;" class="gnt-btn df jcc aic posr" data-qnt-btn="0">-</a>
+											<input type="number" name="product[{{product.product_id}}][packs]" data-input-quantity class="form-control cnt" readonly value="{{cart_products[product.product_id].packs ? cart_products[product.product_id].packs : 0}}">
+											<a href="javascript:;" class="gnt-btn df jcc aic posr" data-qnt-btn="1">+</a>
+										</div>
+									</td>
+									<td class="pack cnt">
+										<div class="mobile-label">Sztuk w opakowaniu</div>
+										<span data-inpack>{{product.in_pack}}</span>
+									</td>
+									<td class="wh-quantity cnt">
+										<div class="mobile-label">Suma</div>
+										<div class="char-value">
+											<input type="number" readonly class="input-hidden cnt" name="product[{{product.product_id}}][quantity]" data-amount value="{{cart_products[product.product_id].quantity ? cart_products[product.product_id].quantity : 0}}">
+										</div>
+									</td>
+									<td class="price cnt">
+										<div class="mobile-label">Cena</div>
+										{% if product.old_price_numeric > product.price_numeric %}
+											<div class="price ">
+												<div class="old-price">{{ product.old_price }}</div>
+												<div class="current">{{ product.price1 }}</div>
+											</div>
+										{% else %}
+											<div class="price">
+												<div class="current">{{ product.price1 }}</div>
+											</div>
+										{% endif %}
+									</td>
+									<td class="product-total cnt">
+										<div class="mobile-label">Wszystko</div>
+										<input type="hidden" name="product[{{product.product_id}}][total]" value="{{cart_products[product.product_id].total}}" data-total>
+										<b>
+											<span data-total-text>{{cart_products[product.product_id].total ? cart_products[product.product_id].total : 0}}</span>
+											zł</b>
+									</td>
+									<td class="mark">
+										<div class="buy-mark{{cart_products[product.product_id].packs ? ' active'}} ta posr" data-mark>
+											<svg class="posa">
+												<use xlink:href="/catalog/view/theme/default/image/sprite.svg#check"></use>
+											</svg>
+										</div>
+									</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			{% endfor %}
+		</div>
+		<div
+			class="payment-totals-container" style="display: flex; flex-wrap:wrap; justify-content: space-between; align-items: flex-start; width: 100%;">
+			<!-- Первый блок: Оплата -->
+			<div class=" payment" style="flex: 1; margin-right: 20px;">
+				<h2>PŁATNOŚĆ</h2>
+				<div class="checkout-payment" data-payment>{{payment}}</div>
+			</div>
+			<div id="payment" style="display:none;"></div>
+
+			<!-- Второй блок: Доставка -->
+			<div class="shipping" style="flex: 1; margin-right: 20px;">
+				<h2>DOSTAWA</h2>
+				<div class="shipping-info">
+					{{shipping}}
+				</div>
+			</div>
+
+			<!-- Третий блок: Остальное -->
+			<div class=" totals" style="flex: 1;">
+				<h2>Podsumowanie</h2>
+				<div class="total-item">
+					<span>Cena + VAT:</span>
+					<span data-totals-subtotal>{{totals.subtotal}}</span>
+				</div>
+				<div class="total-item">
+					<span>Dostawa:</span>
+					<span data-totals-shipping>{{totals.shipping}}</span>
+				</div>
+				<div class="total-item">
+					<span>Rabat:</span>
+					<span data-totals-discount>{{totals.discount}}</span>
+				</div>
+				<div class="total-item">
+					<span>VAT:</span>
+					<span data-totals-tax>{{totals.tax}}</span>
+				</div>
+				<div class="total-item">
+					<span>Wszystko z VAT:</span>
+					<span data-totals-total>{{totals.total}}</span>
+				</div>
+			</div>
+		</div>
+
+		<div id="general-error" class="form-error">{{ error.general }}</div>
+
+
+		<div class="form-error">{{ error.shipping_method }}</div>
+
+
+		<div class="form-error">{{ error.payment_method }}</div>
+
+		<div class="confirm df jce">
+			<button type="button" id="wholesale-confirm" class="btn df aic jcc" onclick="confirm()">
+				Zamawiam
+				<svg width="24" height="27">
+					<use xlink:href="/catalog/view/theme/default/image/sprite.svg#cart"></use>
+				</svg>
+			</button>
+		</div>
+	</form>
+	 <script>
+								var success = 'Dziękujemy za złożenie zamówienia w sklepie. W mailu otrzymasz informacje odnośnie zamówienia';
+								$('[data-payment]').on('change', 'input', function() {
+									$.ajax({
+										url: 'index.php?route=checkout/buy/change_payment&code='+$(this).filter(':checked').val(),
+										error: function(data) {
+											$('#loader').remove();
+											console.log(data.responseText);
+										}
+									});
+								});
+								$(document).on('click', '[data-qnt-btn]', function(){
+									var th = $(this),
+										b = th.parents('[data-quantity]'),
+										i = b.find('input'),
+										v = parseInt(i.val());
+									if(th.data('qnt-btn') > 0) {
+										v++;
+										if(b.data('max') > 0 && v > b.data('max')) return false;
+									} else {
+										v = v - 1;
+										if(v < b.data('min')) return false;
+									}
+									i.val(v);
+									if(th.parents('[data-cart-item]').length) cart.update(b.data('cart'), v);
+									if(typeof(wholesaleUpdate) == 'function') wholesaleUpdate(b.parents('[data-product]'), v);
+									if(typeof(cartUpdate) == 'function') cartUpdate(b.parents('[data-product]'), v);
+								});
+								$(document).on('input', '[data-input-quantity]', function(){
+									var th = $(this),
+										b = th.parents('[data-quantity]'),
+										v = parseInt(th.val());
+									if(v < b.data('min')) th.val(b.data('min'));
+									if(b.data('max') > 0 && v > b.data('max')) th.val(b.data('max'));
+									if(th.parents('[data-cart-item]').length) cart.update(b.data('cart'), v);
+									if(typeof(wholesaleUpdate) == 'function') wholesaleUpdate(b.parents('[data-product]'), v);
+									if(typeof(cartUpdate) == 'function') cartUpdate(b.parents('[data-product]'), v);
+								});
+								
+									function wholesaleUpdate(p, v) {
+										//console.log(p);
+										//console.log(v);
+										var s = parseInt(p.find('[data-inpack]').text()) * v,
+											t = (Math.round(s * p.data('price')*100) / 100).toFixed(2).replace('.', ','),
+											pm = $('#wholesale').find('[data-mobile-product="'+p.data('product')+'"]');
+										p.find('[data-amount]').val(s);
+										p.find('[data-total]').val(t);
+										p.find('[data-total-text]').text(t);
+										if(v) {
+											p.find('[data-mark]').addClass('active');
+											pm.find('[data-mark]').addClass('active');
+										} else {
+											p.find('[data-mark]').removeClass('active');
+											pm.find('[data-mark]').removeClass('active');
+										}
+										//$('body').append(loader);
+										$.ajax({
+											url: 'index.php?route=extension/module/nr_wholesale/calculate',
+											type: 'post',
+											dataType: 'json',
+											data: $('#wholesale').serialize(),
+											success: function(json) {
+												//$('#loader').remove();
+												$('[data-totals-subtotal]').html(json.subtotal);
+												$('[data-totals-discount]').html(json.discount);
+												$('[data-totals-shipping]').html(json.shipping);
+												$('[data-totals-tax]').html(json.tax);
+												$('[data-totals-total]').html(json.total);
+											},
+											error: function(data) {
+												//$('#loader').remove();
+												console.log(data.responseText);
+											}
+										});
+									}
+									function confirm() {
+										$('#wholesale-confirm').prop('disabled', true);
+										$('[data-error]').removeClass('input-error').find('.form-error').text('').hide();
+										$('body').append(loader);
+										$.ajax({
+											url: 'index.php?route=extension/module/nr_wholesale/order',
+											type: 'post',
+											dataType: 'json',
+											data: $('#wholesale').serialize(),
+											success: function(json) {
+											$('#loader').remove();
+												// if(json.error) {
+												// 	$.each(json.error, function(i, v){
+												// 		$('[data-error="'+i+'"]').addClass('input-error').find('.form-error').text(v).show();
+												// 	});
+												// } else if(json.order_id) {
+												// 	window.location.href = '/konto';
+												// 	//nrShowMessage(success, 1);
+												// }
+												
+												// checkJson(json);
+												if(json.error) {
+													$.each(json.error, function(i, v){
+														$('[data-error="'+i+'"]').addClass('input-error').find('.form-error').text(v).show();
+													});
+													renderErrors(json.error);
+													$('#wholesale-confirm').prop('disabled', false);
+													$('html, body').animate({ scrollTop: $('#wholesale').offset().top }, 'slow');
+												} else if(json.payment) {
+													try { $('#payment').html(json.payment).find('#button-confirm').click(); } catch (e) {}
+													try { $('#payment').html(json.payment).find('.js-bluepayment-confirm').click(); } catch (e) {}
+													// try {
+													//  	if ($('#payment').html(json.payment).find('.js-bluepayment-confirm').length>0) {
+													// 		window.location.href = 'index.php?route=extension/payment/bluepayment/processCheckout';
+													//  	}
+													// } catch (e) {}
+												} else {
+													console.log(json);
+												}
+						
+											},
+											error: function(data) {
+												$('#loader').remove();
+												renderErrors(data.responseJSON.error);
+												$('#wholesale-confirm').prop('disabled', false);
+												console.log(data.responseText);
+											}
+										});
+									}
+									$('#input-address').on('change', function() {
+										//$('body').append(loader);
+										$.ajax({
+											url: 'index.php?route=extension/module/nr_wholesale/change_address',
+											type: 'post',
+											data: $('#wholesale').serialize(),
+											success: function(data) {window.location.reload();},
+											error: function(data) {
+												//$('#loader').remove();
+												console.log(data.responseText);
+											}
+										});
+									});
+									$('[data-shipping-methods]').on('change', 'input', function() {
+										//console.log(1)
+										$('body').append(loader);
+										$.ajax({
+											url: 'index.php?route=extension/module/nr_wholesale/change_shipping',
+											type: 'post',
+											data: { shipping_method: $(this).val() },
+											dataType: 'json',
+											success: function(json) {
+												//console.log(json)
+												$('#loader').remove();
+												$('[data-totals-shipping]').html(json.shipping);
+												$('[data-totals-total]').html(json.total);
+											},
+											error: function(data) {
+												$('#loader').remove();
+												console.log(data.responseText);
+											}
+										});
+									});
+									function renderErrors(errors) {
+								// поле-специфичные
+								$.each(errors, function(key, msg) {
+									if (key === 'general' || key === 'shipping_method' || key === 'payment_method') return;
+									var $block = $('[data-error="'+ key +'"]');
+									$block.addClass('input-error')
+										.find('.form-error').show().text(msg);
+								});
+	
+								// общие
+								var general = errors.general
+											|| errors.shipping_method
+											|| errors.payment_method;
+								if (general) {
+									$('#general-error').show().text(general);
+								}
+								}
+	
+								function scrollToTop() {
+								$('html, body').animate({ scrollTop: $('#wholesale').offset().top }, 'slow');
+								}
+									
+								</script>
+{% endif %}

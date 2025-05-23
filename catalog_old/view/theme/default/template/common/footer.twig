@@ -1,0 +1,84 @@
+<footer>
+	{% if schemas_org %}
+		{% for schema in schemas_org %}
+			 <script type="application/ld+json">
+			        {{ schema }}
+			        </script>
+		{% endfor %}
+	{% endif %}
+	<div class="desktop">
+		<div class="footer-top">
+			<div class="footer-list">
+				<div class="footer-logo">
+					<img src="image/catalog/assets/white_logo.svg">
+				</div>
+				<div class="social-networks">
+					<div>
+						<a href="https://allegro.pl/uzytkownik/spichlerz24pl?order=m" target="_blank" rel="noopener"><img src="image/catalog/assets/allegro_icon.svg"/></a>
+					</div>
+					<div>
+						<a href="https://www.instagram.com/spichlerz24.pl/" target="_blank" rel="noopener"><img src="image/catalog/assets/instagram_icon.svg"/></a>
+					</div>
+					<div>
+						<a href="https://www.facebook.com/spichlerz24" target="_blank" rel="noopener"><img src="image/catalog/assets/facebook_icon.svg"/></a>
+					</div>
+				</div>
+			</div>
+			<div class="footer-list">
+				<a href="/o-nas">O NAS</a>
+				<a href="/sklep">SKLEP</a>
+				<a href="/hurtownia">Platforma B2B</a>
+				<a href="/wspolpraca">WSPÓŁPRACA</a>
+			</div>
+			<div class="footer-list">
+				<a href="/regulamin-sklepu">REGULAMIN SKLEPU</a>
+				<a href="/najczesciej-zadawane-pytania">NAJCZĘŚCIEJ ZADAWANE PYTANIA</a>
+				<a href="/dostawa-i-platnosc">KOSZT I SPOSÓB DOSTAWY</a>
+				<a href="/kontakt">KONTAKT</a>
+			</div>
+		</div>
+		<div class="footer-separator"></div>
+		<div class="footer-bottom">
+			<div>
+				Copyright 2023. Wszelkie prawa zastrzeżone.
+			</div>
+		</div>
+	</div>
+	<div class="footer-mobile">
+		<div class="top">
+			<img src="image/catalog/assets/white_logo.svg">
+		</div>
+		<div class="midle">
+			<div class="footer-list">
+				<a href="/o-nas">O NAS</a>
+				<a href="/sklep">SKLEP</a>
+				<a href="/hurtownia">Platforma B2B</a>
+				<a href="/wspolpraca">WSPÓŁPRACA</a>
+			</div>
+			<div class="footer-list">
+				<a href="/regulamin-sklepu">REGULAMIN SKLEPU</a>
+				<a href="/najczesciej-zadawane-pytania">NAJCZĘŚCIEJ ZADAWANE PYTANIA</a>
+				<a href="/dostawa-i-platnosc">KOSZT I SPOSÓB DOSTAWY</a>
+				<a href="/kontakt">KONTAKT</a>
+			</div>
+		</div>
+		<div class="bottom">
+			<div class="social-networks">
+				<div>
+					<a href="https://allegro.pl/uzytkownik/spichlerz24pl?order=m" target="_blank" rel="noopener"><img src="image/catalog/assets/allegro_icon.svg"/></a>
+				</div>
+				<div>
+					<a href="https://www.instagram.com/spichlerz24.pl/" target="_blank" rel="noopener"><img src="image/catalog/assets/instagram_icon.svg"/></a>
+				</div>
+				<div>
+					<a href="https://www.facebook.com/spichlerz24" target="_blank" rel="noopener"><img src="image/catalog/assets/facebook_icon.svg"/></a>
+				</div>
+			</div>
+		</div>
+	</div>
+	{% if scripts %}
+		{% for script in scripts %}
+			 <script src="{{ script }}" type="text/javascript"></script>
+		{% endfor %}
+	{% endif %}
+</footer>

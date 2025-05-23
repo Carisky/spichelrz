@@ -1,0 +1,56 @@
+{{ header }}
+
+<div id="blog" class="blog-article">
+  <!-- Breadcrumbs -->
+  <div class="container">
+    <div class="breadcrumbs">
+      {% for breadcrumb in breadcrumbs %}
+        {% if loop.last %}
+          <span class="last">{{ breadcrumb.text }}</span>
+        {% elseif loop.index != 2 %}
+          <a class="link" href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a>
+          <i>/</i>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Картинка с наложенным заголовком -->
+  <div class="image-wrapper" style="position: relative;">
+    <!-- Фоновая картинка с z-index: 0 -->
+    <img src="image/{{image}}"  style="width: 100%;
+    max-height: 360px;
+    position: relative;
+    object-fit: cover;
+    filter: brightness(60%);
+    z-index: 0;">
+    <!-- Заголовок, наложенный на картинку (z-index выше) -->
+    <div class="heading-overlay" style="
+          position: absolute;
+          top: 15%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 1;
+          text-align: center;
+          width: 100%;
+          color: #fff;">
+      <h1 class="heading-title">{{ heading_title }}</h1>
+    </div>
+  </div>
+
+  <!-- Описание -->
+  <div class="container">
+    <article>
+      <div class="content">
+        {{ description }}
+      </div>
+    </article>
+  </div>
+
+  {{ content_top }}
+  {{ column_left }}
+  {{ column_right }}
+  {{ content_bottom }}
+</div>
+
+{{ footer }}

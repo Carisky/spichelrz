@@ -1,0 +1,7 @@
+{% if schemas_org %}
+    {% for schema in schemas_org %}
+        <script type="application/ld+json">
+        {{ schema|json_encode(constant('JSON_PRETTY_PRINT'))|raw }}
+        </script>
+    {% endfor %}
+{% endif %}

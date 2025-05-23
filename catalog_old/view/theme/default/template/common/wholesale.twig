@@ -1,0 +1,147 @@
+<head>
+	<link href="catalog/view/theme/default/stylesheet/common/breadcrumbs.css" type="text/css" rel="stylesheet"/>
+	<link href="catalog/view/theme/default/stylesheet/common/wholesale.css" type="text/css" rel="stylesheet"/>
+</head>
+
+{{header}}
+<main>
+	{% if breadcrumbs %}
+		<div class="breadcrumbs">
+			{% for breadcrumb in breadcrumbs %}
+				<div>
+					{% if loop.last %}
+						<span class="last">{{ breadcrumb.text }}</span>
+					{% else %}
+						<a class="link" href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a>
+						<span>/</span>
+					{% endif %}
+				</div>
+			{% endfor %}
+		</div>
+	{% endif %}
+
+	<section class="checkout-form">
+		<form>
+			<section class="block">
+				<h1>Twoje dane</h1>
+				<div class="form-group">
+					<input type="text" id="first-name" placeholder="Imię *" required>
+				</div>
+				<div class="form-group">
+					<input type="text" id="last-name" placeholder="Nazwisko *" required>
+				</div>
+				<div class="form-group">
+					<input type="tel" id="phone" placeholder="Numer telefonu *" required>
+				</div>
+				<div class="form-group">
+					<input type="email" id="email" placeholder="Adres e-mail *" required>
+				</div>
+			</section>
+			<section class="block">
+				<h1>Dane do faktury</h1>
+				<div class="form-group">
+					<input type="text" id="firm-name" placeholder="Nazwa firmy *" required>
+				</div>
+				<div class="form-group">
+					<input type="text" id="nip-number" placeholder="Numer NIP *" required>
+				</div>
+				<div class="form-group">
+					<input type="text" id="address" placeholder="Pełny adres *" required>
+				</div>
+			</section>
+			<section class="block">
+				<h1>Dane do wysyłki</h1>
+				<div class="form-group">
+					<input type="text" id="first-name" placeholder="Imię *" required>
+				</div>
+			</section>
+			<section class="block">
+				<h1>Komentarz do zamówienia</h1>
+				<div class="form-group">
+					<input type="text" id="comment" placeholder="Komentarz">
+				</div>
+			</section>
+		</form>
+	</section>
+
+	{% if category_products %}
+		<div class="category-products">
+			{% for category in category_products %}
+				<div class="category">
+					<h2>{{ category.category_name }}</h2>
+					<!-- Название категории -->
+
+					<table class="table table-bordered">
+						<thead>
+							<tr>
+								<th>Okładka</th>
+								<th>Nazwa produktu</th>
+								<th>Ilość opakowań zbiorczych</th>
+								<th>Sztuk w opakowaniu</th>
+								<th>Suma</th>
+								<th>Cena za jedno opakowanie</th>
+								<th>Wszystko</th>
+								<th>Podatek</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for product in category.products %}
+								<tr data-currency="{{ product.currency_symbol }}" data-product-quantity-per-pack="{{ product.quantity_per_pack }}" data-product-id="{{ product.product_id }}" data-price="{{ product.price_per_pack }}">
+									<td><img src="{{ product.image }}" alt="{{ product.name }}" class="img-thumbnail"/></td>
+									<td data-label="Nazwa produktu">
+										<div class="data">{{ product.name }}</div>
+									</td>
+									<td>
+										<div class="actions">
+											<div class="minus">-</div>
+											<div class="value">0</div>
+											<div class="plus">+</div>
+										</div>
+									</td>
+									<td data-label="Ilość">{{ product.quantity_per_pack }}</td>
+									<td data-label="Suma">
+										<div class="quantity_per_pack data sum">{{product.quantity_per_pack}}</div>
+									</td>
+									<td data-label="Cena">{{ product.price_per_pack }}<span>{{product.currency_symbol}}</span>
+									</td>
+									<td data-label="Wszystko">
+										<div class="data total-price">{{product.price_per_pack}}</div>
+									</td>
+									<td data-label="Podatek">{{product.tax_rate}}</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				</div>
+			{% endfor %}
+		</div>
+	{% else %}
+		<p>Brak produktów w tej kategorii.</p>
+	{% endif %}
+	<div class="checkout">
+		<div class="payment_methods">
+			<h3>Metoda płatności</h3>
+			{% for payment in payment_methods %}
+				<label>
+					<input type="radio" name="payment_method" value="{{ payment.code }}">
+					{{ payment.title }}
+				</label>
+			{% endfor %}
+		</div>
+		<div class="content">
+
+			<div class="price">
+				<div class="text">Cena</div>
+				<div class="wrapper">
+					<div id="checkout-price">0</div>
+					<span class="text">{{product_currency}}</span>
+				</div>
+
+			</div>
+
+			<div id="checkout">Zamawiam</div>
+		</div>
+	</div>
+</main>
+{{footer}}
+ <script type="text/javascript" src="catalog/view/javascript/wholesale/wholesale.js"></script>
