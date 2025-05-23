@@ -143,8 +143,9 @@
 					<input placeholder="Twoje imię *" type="text" id="name" name="name" required>
 				</div>
 				<div class="form-control">
-					<textarea placeholder="Twoja opinia *" id="opinion" name="text" required></textarea>
+					<textarea placeholder="Twoja opinia *" rows="3" id="opinion" name="text" required></textarea>
 				</div>
+				<div id="recaptcha"></div>
 				<div class="button-container">
 					<button type="submit" class="submit-button">
 						<div>Wyślij</div><img src="image/catalog/assets/arrow_right.svg"/></button>
@@ -180,53 +181,70 @@
 
 </div>
 
+{# Перед </body> — ваш скрипт #}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const form = document.getElementById('review-form');
-  const msg  = document.getElementById('review-message');
+  var reviewCaptchaId;
 
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    msg.textContent = ''; // очистить старые
-    const data = new FormData(form);
-
-    fetch(form.action, {
-      method: 'POST',
-      credentials: 'same-origin',
-      body: data
-    })
-    .then(res => res.json())
-    .then(json => {
-      if (json.error) {
-        msg.innerHTML = '<div class="alert alert-danger">'+json.error+'</div>';
-      } else if (json.success) {
-        msg.innerHTML = '<div class="alert alert-success">'+json.success+'</div>';
-        form.reset();
-        // опционально: перезагрузить блок с отзывами
-        loadReviews();
-      }
-    })
-    .catch(() => {
-      msg.innerHTML = '<div class="alert alert-danger">Ошибка сети, попробуйте позже.</div>';
+  // После загрузки API рендерим виджет
+  function onloadReviewCaptcha() {
+    reviewCaptchaId = grecaptcha.render('recaptcha', {
+      'sitekey': '6LcdvkYrAAAAAJn1VvFLQxAXRVvqLy1jqCQHbmc8'
     });
-  });
-
-  function loadReviews(page = 1) {
-    const pid = form.querySelector('input[name="product_id"]').value;
-			console.log(1)
-    fetch(`index.php?route=product/product/review&product_id=${pid}&page=${page}`)
-      .then(res => res.text())
-      .then(html => {
-        document.getElementById('reviews').innerHTML = html;
-		console.log(html)
-
-      });
-	  
   }
-  loadReviews(1)
-});
 
+  document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('review-form');
+    const msg  = document.getElementById('review-message');
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      msg.textContent = '';
+
+      // Получаем ответ капчи
+      const token = grecaptcha.getResponse(reviewCaptchaId);
+      if (!token) {
+        msg.innerHTML = '<div class="alert alert-danger">Proszę potwierdzić, że nie jesteś robotem.</div>';
+        return;
+      }
+
+      const data = new FormData(form);
+      data.append('g-recaptcha-response', token);
+
+      fetch(form.action, {
+        method: 'POST',
+        body: data,
+        credentials: 'same-origin'
+      })
+      .then(res => res.json())
+      .then(json => {
+        if (json.error) {
+          msg.innerHTML = '<div class="alert alert-danger">'+json.error+'</div>';
+        } else {
+          msg.innerHTML = '<div class="alert alert-success">'+json.success+'</div>';
+          form.reset();
+          grecaptcha.reset(reviewCaptchaId);
+          loadReviews();
+        }
+      })
+      .catch(() => {
+        msg.innerHTML = '<div class="alert alert-danger">Ошибка сети, попробуйте позже.</div>';
+        grecaptcha.reset(reviewCaptchaId);
+      });
+    });
+
+    // Загрузка и пагинация отзывов
+    function loadReviews(page = 1) {
+      const pid = form.querySelector('input[name="product_id"]').value;
+      fetch(`index.php?route=product/product/review&product_id=${pid}&page=${page}`)
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById('reviews').innerHTML = html;
+        });
+    }
+    loadReviews();
+  });
 </script>
+
 
 
 {{footer}}
