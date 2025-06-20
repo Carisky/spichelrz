@@ -1,0 +1,19 @@
+# Config and Htaccess Files
+/.htaccess
+/config.php
+/admin/config.php
+
+system/storage/cache
+
+#image files
+image/
+storage/cache
+storage/logs
+storage/session
+
+# IDE Project files
+/upload/.idea/*
+/.idea/*
+/.DS_Store
+/.cache
+/.php-cs-fixer.cache
