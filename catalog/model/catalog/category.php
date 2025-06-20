@@ -66,4 +66,12 @@ class ModelCatalogCategory extends Model {
 
 		return $query->row['total'];
 	}
+		public function getCategoryFaq($category_id) {
+		$query = $this->db->query(
+			"SELECT * FROM `" . DB_PREFIX . "category_faq` "
+		. "WHERE category_id = " . (int)$category_id . " "
+		. "ORDER BY sort_order"
+		);
+		return $query->rows;
+	}
 }

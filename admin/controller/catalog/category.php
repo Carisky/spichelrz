@@ -20,8 +20,11 @@ class ControllerCatalogCategory extends Controller {
 		$this->load->model('catalog/category');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
-			$this->model_catalog_category->addCategory($this->request->post);
 
+			// сохраняем FAQ-ы, если они переданы
+			// обновляем FAQ-ы (даже если пустой массив — удалит все старые записи)
+			$faqs = isset($this->request->post['category_faq']) ? $this->request->post['category_faq'] : [];
+			$this->model_catalog_category->editCategoryFaq($this->request->get['category_id'], $faqs);
 			$this->session->data['success'] = $this->language->get('text_success');
 
 			$url = '';
@@ -53,7 +56,10 @@ class ControllerCatalogCategory extends Controller {
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
 			$this->model_catalog_category->editCategory($this->request->get['category_id'], $this->request->post);
+			// обновляем FAQ-ы
+			$faqs = isset($this->request->post['category_faq']) ? $this->request->post['category_faq'] : [];
 
+			$this->model_catalog_category->editCategoryFaq($this->request->get['category_id'], $faqs);
 			$this->session->data['success'] = $this->language->get('text_success');
 
 			$url = '';
@@ -504,6 +510,16 @@ class ControllerCatalogCategory extends Controller {
 		$data['header'] = $this->load->controller('common/header');
 		$data['column_left'] = $this->load->controller('common/column_left');
 		$data['footer'] = $this->load->controller('common/footer');
+
+
+				// подготовка FAQ для формы
+		if (isset($this->request->post['category_faq'])) {
+			$data['category_faq'] = $this->request->post['category_faq'];
+		} elseif (isset($this->request->get['category_id'])) {
+			$data['category_faq'] = $this->model_catalog_category->getCategoryFaq($this->request->get['category_id']);
+		} else {
+			$data['category_faq'] = [];
+		}
 
 		$this->response->setOutput($this->load->view('catalog/category_form', $data));
 	}

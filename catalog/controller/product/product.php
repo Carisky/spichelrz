@@ -523,7 +523,14 @@ class ControllerProductProduct extends Controller {
 			$schema['@type'] = 'Product';
 
 			$schema['name'] = $product_info['name'];
-
+			if ($product_info['image']) {
+				$schema['image'] = $this->model_tool_image->resize(
+					$product_info['image'],
+					$this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_width'),
+					$this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height')
+				);
+			}
+			exit;
 			if($product_info['meta_description']){
 
 			$schema['description'] = $product_info['meta_description'];

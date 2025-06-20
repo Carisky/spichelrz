@@ -355,5 +355,23 @@ class ModelCatalogCategory extends Model {
 		$query = $this->db->query("SELECT COUNT(*) AS total FROM " . DB_PREFIX . "category_to_layout WHERE layout_id = '" . (int)$layout_id . "'");
 
 		return $query->row['total'];
+	}
+	public function getCategoryFaq($category_id) {
+		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "category_faq WHERE category_id = " . (int)$category_id . " ORDER BY sort_order ASC");
+		return $query->rows; // или преобразуйте в нужный формат
+	}
+	public function editCategoryFaq($category_id, $faqs) {
+		$this->db->query("DELETE FROM `" . DB_PREFIX . "category_faq` 
+		WHERE category_id = " . (int)$category_id);
+	foreach ($faqs as $language_id => $items) {
+		foreach ($items as $item) {
+			$this->db->query("INSERT INTO `" . DB_PREFIX . "category_faq` SET 
+				category_id = " . (int)$category_id . ",
+				language_id = " . (int)$language_id . ",
+				question = '" . $this->db->escape($item['question']) . "',
+				answer   = '" . $this->db->escape($item['answer']) . "',
+				sort_order = " . (int)$item['sort_order']);
+			}
+		}
 	}	
 }

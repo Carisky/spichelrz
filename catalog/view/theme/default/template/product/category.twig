@@ -63,6 +63,9 @@
 <div id="pagination" class="pagination">{{ pagination }}</div>
 
 <div class="additional">
+		{% if faq %}
+			{{ faq|raw }}
+		{% endif %}
 	<div class="block">
 		{{description}}
 	</div>
