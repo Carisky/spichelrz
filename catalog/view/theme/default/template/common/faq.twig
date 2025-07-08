@@ -14,9 +14,11 @@
 
 <style>
 .faq-list {
-  max-width: 800px;
   margin: 2rem auto;
+  margin-left:20px;
+  margin-right:20px;
 }
+
 .faq-item {
   border: 1px solid #e0e0e0;
   border-radius: .5rem;
@@ -24,16 +26,22 @@
   overflow: hidden;
   transition: box-shadow .2s ease;
 }
+
 .faq-item:hover {
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
+
 .faq-question {
-  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   padding: 1rem 1.5rem;
   background: #fafafa;
   cursor: pointer;
   font-weight: 600;
+  position: relative;
 }
+
 .faq-question::after {
   content: '+';
   position: absolute;
@@ -41,10 +49,13 @@
   top: 50%;
   transform: translateY(-50%);
   transition: transform .2s ease;
+  font-size: 1.25rem;
 }
+
 .faq-item.active .faq-question::after {
   transform: translateY(-50%) rotate(45deg);
 }
+
 .faq-answer {
   max-height: 0;
   padding: 0 1.5rem;
@@ -53,10 +64,25 @@
   overflow: hidden;
   transition: max-height .3s ease, padding .3s ease;
 }
+
 .faq-item.active .faq-answer {
   padding: 1rem 1.5rem;
-  max-height: 500px; /* достаточно для любых ответов */
+  max-height: 500px;
 }
+
+/* Обёртка для иконки и текста, если нужно */
+.faq-icon {
+  flex-shrink: 0;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.faq-text {
+  white-space: normal;
+  word-break: break-word;
+  flex: 1;
+}
+
 </style>
 
 <script>

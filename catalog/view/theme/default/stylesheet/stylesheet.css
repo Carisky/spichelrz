@@ -5564,7 +5564,52 @@ form div button {
   color: #987253;
   text-decoration: unset;
 }
+#checkbox_privacy_policy{
+  font-size: 12px;
+  justify-content: left;
+  text-align: left;
+}
+.form-block{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+.popup-input{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+.form-block label{
+  font-size: 14px;
+  font-weight: 600;
+}
 
+.popup-input label{
+  font-size: 14px;
+  font-weight: 600;
+}
+@media (min-width: 1240px){
+.form-block label{
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.popup-input label{
+  font-size: 20px;
+  font-weight: 600;
+}
+}
+@media (min-width: 1920px){
+.form-block label{
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.popup-input label{
+  font-size: 24px;
+  font-weight: 600;
+}
+}
 @media (min-width: 1920px) {
   .wholesale-products table td {
     font-size: 40px;
@@ -5595,13 +5640,15 @@ form div button {
     height: 40px;
   }
   h2 .product-title3 {
-    font-size: 40px;
+    font-size: 25px;
     line-height: normal;
   }
   .wholesale-customer-data .column .form-block input,
-  h3,
+  h3 {
+    font-size: 25px;
+  }
   .form-error {
-    font-size: 40px;
+    font-size: 15px;
   }
   .payment-totals-container div h2,
   .payment-totals-container div,
@@ -5620,22 +5667,22 @@ form div button {
   .breadcrumbs .link,
   .last {
     line-height: normal;
-    font-size: 30px;
+    font-size: 20px;
   }
   .breadcrumbs .last {
     line-height: normal;
-    font-size: 30px;
+    font-size: 20px;
   }
   .breadcrumbs i {
     margin-left: 10px;
     margin-right: 10px;
-    font-size: 30px;
+    font-size: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
   }
   .breadcrumbs span{
-    font-size: 30px;
+    font-size: 20px;
   }
   .confirm .btn {
     font-size: 40px;

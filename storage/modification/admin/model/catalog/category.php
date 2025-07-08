@@ -357,8 +357,11 @@ class ModelCatalogCategory extends Model {
 		return $query->row['total'];
 	}
 	public function getCategoryFaq($category_id) {
-		$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "category_faq WHERE category_id = " . (int)$category_id . " ORDER BY sort_order ASC");
-		return $query->rows; // или преобразуйте в нужный формат
+		$this->db->query("SET NAMES 'utf8mb4'");
+		$query = $this->db->query("SELECT * FROM `" . DB_PREFIX . "category_faq` 
+			WHERE category_id = " . (int)$category_id . " 
+			ORDER BY sort_order");
+		return $query->rows;
 	}
 	public function editCategoryFaq($category_id, $faqs) {
 		$this->db->query("DELETE FROM `" . DB_PREFIX . "category_faq` 

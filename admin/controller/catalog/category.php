@@ -20,7 +20,7 @@ class ControllerCatalogCategory extends Controller {
 		$this->load->model('catalog/category');
 
 		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
-
+			$this->model_catalog_category->addCategory($this->request->post);
 			// сохраняем FAQ-ы, если они переданы
 			// обновляем FAQ-ы (даже если пустой массив — удалит все старые записи)
 			$faqs = isset($this->request->post['category_faq']) ? $this->request->post['category_faq'] : [];

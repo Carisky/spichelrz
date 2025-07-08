@@ -6,10 +6,10 @@ define('HTTP_SERVER', 'http://spichelrz/');
 define('HTTPS_SERVER', 'http://spichelrz/');
 
 // DIR
-define('DIR_APPLICATION', 'C:/OSPanel/domains/spichelrz/catalog/');
-define('DIR_SYSTEM', 'C:/OSPanel/domains/spichelrz/system/');
-define('DIR_IMAGE', "C:/OSPanel/domains/spichelrz/image/");
-define('DIR_STORAGE', "C:/OSPanel/domains/spichelrz/storage/");
+define('DIR_APPLICATION', 'E:/OsPanel/domains/spichelrz/catalog/');
+define('DIR_SYSTEM', 'E:/OsPanel/domains/spichelrz/system/');
+define('DIR_IMAGE', "E:/OsPanel/domains/spichelrz/image/");
+define('DIR_STORAGE', "E:/OsPanel/domains/spichelrz/storage/");
 define('DIR_LANGUAGE', DIR_APPLICATION . 'language/');
 define('DIR_TEMPLATE', DIR_APPLICATION . 'view/theme/');
 define('DIR_CONFIG', DIR_SYSTEM . 'config/');

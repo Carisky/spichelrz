@@ -8,11 +8,11 @@ define('HTTPS_SERVER', 'http://spichelrz/admin/');
 define('HTTPS_CATALOG', 'http://spichelrz/');
 
 // DIR
-define('DIR_APPLICATION', 'C:/OSPanel/domains/spichelrz/admin/');
-define('DIR_CATALOG', 'C:/OSPanel/domains/spichelrz/admin/');
-define('DIR_SYSTEM', 'C:/OSPanel/domains/spichelrz/system/');
-define('DIR_IMAGE', "C:/OSPanel/domains/spichelrz/image/");
-define('DIR_STORAGE', "C:/OSPanel/domains/spichelrz/storage/");
+define('DIR_APPLICATION', 'E:/OsPanel/domains/spichelrz/admin/');
+define('DIR_CATALOG', 'E:/OsPanel/domains/spichelrz/admin/');
+define('DIR_SYSTEM', 'E:/OsPanel/domains/spichelrz/system/');
+define('DIR_IMAGE', "E:/OsPanel/domains/spichelrz/image/");
+define('DIR_STORAGE', "E:/OsPanel/domains/spichelrz/storage/");
 define('DIR_LANGUAGE', DIR_APPLICATION . 'language/');
 define('DIR_TEMPLATE', DIR_APPLICATION . 'view/template/');
 define('DIR_CONFIG', DIR_SYSTEM . 'config/');

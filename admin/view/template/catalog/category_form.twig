@@ -25,13 +25,13 @@
       </div>
       <div class="panel-body">
         <form action="{{ action }}" method="post" enctype="multipart/form-data" id="form-category" class="form-horizontal">
-<ul class="nav nav-tabs">
-  <li class="active"><a href="#tab-general" data-toggle="tab">{{ tab_general }}</a></li>
-  <li><a href="#tab-data" data-toggle="tab">{{ tab_data }}</a></li>
-  <li><a href="#tab-seo" data-toggle="tab">{{ tab_seo }}</a></li>
-  <li><a href="#tab-design" data-toggle="tab">{{ tab_design }}</a></li>
-  <li><a href="#tab-faq" data-toggle="tab">FAQ</a></li>
-</ul>
+          <ul class="nav nav-tabs">
+            <li class="active"><a href="#tab-general" data-toggle="tab">{{ tab_general }}</a></li>
+            <li><a href="#tab-data" data-toggle="tab">{{ tab_data }}</a></li>
+            <li><a href="#tab-seo" data-toggle="tab">{{ tab_seo }}</a></li>
+            <li><a href="#tab-design" data-toggle="tab">{{ tab_design }}</a></li>
+            <li><a href="#tab-faq" data-toggle="tab">FAQ</a></li>
+          </ul>
           <div class="tab-content">
             <div class="tab-pane active" id="tab-general">
               <ul class="nav nav-tabs" id="language">
@@ -232,60 +232,57 @@
                 </table>
               </div>
             </div>
-                        <div class="tab-pane" id="tab-faq">
-              <ul class="nav nav-tabs" id="faq-language">
-                {% for language in languages %}
-                  <li><a href="#faq-lang-{{ language.language_id }}" data-toggle="tab">
-                    <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" />
-                    {{ language.name }}
-                  </a></li>
-                {% endfor %}
-              </ul>
-              <div class="tab-content">
-                {% for language in languages %}
-                  <div class="tab-pane" id="faq-lang-{{ language.language_id }}">
-                    <button type="button" class="btn btn-default" onclick="addFaqRow({{ language.language_id }})">
-                      + Dodaj Q&A
-                    </button>
-                    <table class="table table-bordered" id="faq-table-{{ language.language_id }}">
-                      <thead>
-                        <tr>
-                          <th>Pytanije</th>
-                          <th>Odpowiedz</th>
-                          <th style="width:80px">Koleja</th>
-                          <th></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-{% if category_faq %}
-  {% for faq in category_faq %}
-    {% if faq.language_id == language.language_id %}
-      <tr>
-        <td>
-          <input type="text" name="category_faq[{{ language.language_id }}][{{ loop.index0 }}][question]"
-                 value="{{ faq.question }}" class="form-control"/>
-        </td>
-        <td>
-          <textarea name="category_faq[{{ language.language_id }}][{{ loop.index0 }}][answer]"
-                    class="form-control">{{ faq.answer|raw }}</textarea>
-        </td>
-        <td>
-          <input type="number" name="category_faq[{{ language.language_id }}][{{ loop.index0 }}][sort_order]"
-                 value="{{ faq.sort_order }}" class="form-control"/>
-        </td>
-        <td>
-          <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">×</button>
-        </td>
-      </tr>
-    {% endif %}
-  {% endfor %}
-{% endif %}
-
-                      </tbody>
-                    </table>
-                  </div>
-                {% endfor %}
-              </div>
+            <div class="tab-pane" id="tab-faq">
+            <ul class="nav nav-tabs" id="faq-language">
+              {% for language in languages %}
+                <li><a href="#faq-lang-{{ language.language_id }}" data-toggle="tab">
+                  <img src="language/{{ language.code }}/{{ language.code }}.png" title="{{ language.name }}" />
+                  {{ language.name }}
+                </a></li>
+              {% endfor %}
+            </ul>
+            <div class="tab-content">
+              {% for language in languages %}
+                <div class="tab-pane" id="faq-lang-{{ language.language_id }}">
+                  <button type="button" class="btn btn-default" onclick="addFaqRow({{ language.language_id }})">
+                    + Dodaj Q&A
+                  </button>
+                  <table class="table table-bordered" id="faq-table-{{ language.language_id }}">
+                    <thead>
+                      <tr>
+                        <th>Pytanije</th>
+                        <th>Odpowiedz</th>
+                        <th style="width:80px">Koleja</th>
+                        <th></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% if category_faq %}
+                        {% for faq in category_faq if faq.language_id == language.language_id %}
+                          <tr>
+                            <td>
+                              <input type="text" name="category_faq[{{ language.language_id }}][{{ loop.index0 }}][question]"
+                                    value="{{ faq.question }}" class="form-control"/>
+                            </td>
+                            <td>
+                              <textarea name="category_faq[{{ language.language_id }}][{{ loop.index0 }}][answer]"
+                                        class="form-control">{{ faq.answer|raw }}</textarea>
+                            </td>
+                            <td>
+                              <input type="number" name="category_faq[{{ language.language_id }}][{{ loop.index0 }}][sort_order]"
+                                    value="{{ faq.sort_order }}" class="form-control"/>
+                            </td>
+                            <td>
+                              <button type="button" class="btn btn-danger btn-sm"
+                                      onclick="this.closest('tr').remove()">×</button>
+                            </td>
+                          </tr>
+                        {% endfor %}
+                      {% endif %}
+                    </tbody>
+                  </table>
+                </div>
+              {% endfor %}
             </div>
           </div>
         </form>
@@ -363,7 +360,7 @@ $('#category-filter').delegate('.fa-minus-circle', 'click', function() {
 $('#language a:first').tab('show');
 //--></script>
 
-<script type="text/javascript">
+<script type="text/javascript"><!--
   function addFaqRow(langId) {
     var tbody = document.querySelector('#faq-table-' + langId + ' tbody');
     var index = tbody.rows.length;
@@ -376,10 +373,8 @@ $('#language a:first').tab('show');
     `;
     tbody.appendChild(tr);
   }
-
-  // Activate first FAQ language tab
+  // Активируем первую language-вкладку FAQ
   document.querySelectorAll('#faq-language a')[0].click();
-</script>
-
+//--></script>
 </div>
-
+{{ footer }}
