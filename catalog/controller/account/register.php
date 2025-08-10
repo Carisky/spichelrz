@@ -107,6 +107,8 @@ class ControllerAccountRegister extends Controller {
             $data['text_service'] = $this->language->get('text_service');
             $data['text_thanks'] = $this->language->get('text_thanks');
 
+            // Always require admin approval for new accounts
+            $data['approval'] = true;
             $this->load->model('account/customer_group');
             if (isset($this->request->post['customer_group_id'])) {
                 $customer_group_id = (int)$this->request->post['customer_group_id'];
