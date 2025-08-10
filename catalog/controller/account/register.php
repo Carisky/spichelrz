@@ -96,8 +96,38 @@ class ControllerAccountRegister extends Controller {
 
         if (!$json) {
             $customer_id = $this->model_account_customer->addCustomer($this->request->post);
-            $this->customer->login($this->request->post['email'], $this->request->post['password']);
-            $this->session->data['customer_id'] = $customer_id;
+
+            // Send mail about account awaiting admin approval
+            $this->load->language('mail/register');
+
+            $data = [];
+            $data['text_welcome'] = sprintf($this->language->get('text_welcome'), html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
+            $data['text_login'] = $this->language->get('text_login');
+            $data['text_approval'] = $this->language->get('text_approval');
+            $data['text_service'] = $this->language->get('text_service');
+            $data['text_thanks'] = $this->language->get('text_thanks');
+
+            // Always require admin approval for new accounts
+            $data['approval'] = true;
+
+            $data['login'] = $this->url->link('account/login', '', true);
+            $data['store'] = html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8');
+
+            $mail = new Mail($this->config->get('config_mail_engine'));
+            $mail->parameter = $this->config->get('config_mail_parameter');
+            $mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
+            $mail->smtp_username = $this->config->get('config_mail_smtp_username');
+            $mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
+            $mail->smtp_port = $this->config->get('config_mail_smtp_port');
+            $mail->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
+
+            $mail->setTo($this->request->post['email']);
+            $mail->setFrom($this->config->get('config_email'));
+            $mail->setSender(html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8'));
+            $mail->setSubject(sprintf($this->language->get('text_subject'), html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8')));
+            $mail->setText($this->load->view('mail/register', $data));
+            $mail->send();
+
             $json['redirect'] = $this->url->link('account/edit');
         }
 
