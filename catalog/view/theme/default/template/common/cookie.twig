@@ -1,19 +1,52 @@
-<div id="cookie" style="position:fixed;bottom:0;width:100%;background:#f8f9fa;display:none;z-index:9999;">
-  <div class="container">
-    <div class="row mt-2">
-      <div class="col-12 p-2 text-center"><p>{{ text_cookie }}</p>
-        <button type="button" value="{{ agree }}" class="btn bg-primary btn-block text-white">{{ button_agree }}</button>&nbsp;&nbsp;&nbsp;<button type="button" value="{{ disagree }}" class="btn btn-light btn-block">{{ button_disagree }}</button>
-      </div>
-    </div>
+<div id="cookie" class="cookie-banner" role="dialog" aria-live="polite" hidden>
+  <p class="cookie-text">{{ text_cookie }}</p>
+  <div class="cookie-actions">
+    <button type="button" class="btn btn-primary" data-url="{{ agree }}">{{ button_agree }}</button>
+    <button type="button" class="btn btn-outline" data-url="{{ disagree }}">{{ button_disagree }}</button>
   </div>
 </div>
+
+<style>
+  :root {
+    --cb-bg: #fff;
+    --cb-text: #5b4a3a;
+    --cb-border: #c7a992;
+    --cb-primary: #987253;
+  }
+  .cookie-banner{
+    position:fixed; left:16px; right:16px; bottom:16px; z-index:9999;
+    max-width:980px; margin:0 auto; padding:16px 20px;
+    background:var(--cb-bg); color:var(--cb-text);
+    border:1px solid var(--cb-border); border-radius:12px;
+    box-shadow:0 8px 24px rgba(0,0,0,.08);
+    display:flex; align-items:center; gap:16px;
+  }
+  .cookie-text{margin:0; line-height:1.4; font-size:16px; flex:1}
+  .cookie-actions{display:flex; gap:12px; flex-wrap:nowrap}
+  .btn{appearance:none; border-radius:10px; padding:10px 16px; font-weight:600; cursor:pointer}
+  .btn:focus{outline:2px solid var(--cb-border); outline-offset:2px}
+  .btn-primary{background:var(--cb-primary); color:#fff; border:1px solid var(--cb-primary)}
+  .btn-primary:hover{filter:brightness(.95)}
+  .btn-outline{background:transparent; color:var(--cb-primary); border:1px solid var(--cb-primary)}
+  .btn-outline:hover{background:rgba(152,114,83,.06)}
+
+  @media (max-width:640px){
+    .cookie-banner{flex-direction:column; align-items:stretch; gap:12px}
+    .cookie-actions{flex-direction:column}
+    .btn{width:100%}
+  }
+</style>
+
 <script>
-\$(function(){
-  \$('#cookie').slideDown();
-  \$('#cookie button').on('click', function(){
-    var url = \$(this).val();
-    \$.get(url);
-    \$('#cookie').slideUp();
+document.addEventListener('DOMContentLoaded', function () {
+  var box = document.getElementById('cookie');
+  if (!box) return;
+  box.hidden = false;
+  box.addEventListener('click', function (e) {
+    var btn = e.target.closest('button[data-url]');
+    if (!btn) return;
+    fetch(btn.dataset.url, { credentials: 'same-origin' })
+      .finally(function(){ box.remove(); });
   });
 });
 </script>
