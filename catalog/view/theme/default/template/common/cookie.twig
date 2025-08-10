@@ -1,4 +1,4 @@
-<div id="cookie">
+<div id="cookie" style="position:fixed;bottom:0;width:100%;background:#f8f9fa;display:none;z-index:9999;">
   <div class="container">
     <div class="row mt-2">
       <div class="col-12 p-2 text-center"><p>{{ text_cookie }}</p>
@@ -7,3 +7,13 @@
     </div>
   </div>
 </div>
+<script>
+\$(function(){
+  \$('#cookie').slideDown();
+  \$('#cookie button').on('click', function(){
+    var url = \$(this).val();
+    \$.get(url);
+    \$('#cookie').slideUp();
+  });
+});
+</script>
