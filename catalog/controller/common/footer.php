@@ -14,10 +14,14 @@ class ControllerCommonFooter extends Controller {
 					'href'  => $this->url->link('information/information', 'information_id=' . $result['information_id'])
 				);
 			}
-		}
-
-		$data['contact'] = $this->url->link('information/contact');
-		$data['return'] = $this->url->link('account/return/add', '', true);
+		}                $data['scripts'] = $this->document->getScripts('footer');
+                $data['styles'] = $this->document->getStyles('footer');
+                $data['schemas_org'] = $this->document->getSchema();
+                $data['cookie'] = $this->load->controller('common/cookie');
+
+                return $this->load->view('common/footer', $data);
+        }
+}
 		$data['sitemap'] = $this->url->link('information/sitemap');
 		$data['tracking'] = $this->url->link('information/tracking');
 		$data['manufacturer'] = $this->url->link('product/manufacturer');
