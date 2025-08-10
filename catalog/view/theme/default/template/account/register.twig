@@ -1,139 +1,218 @@
 {{ header }}
 
 <div class="alert alert-danger alert-dismissible" id="error-warning">
-	{{ error_warning }}</div>
+	{{ error_warning }}
+</div>
 
 <div id="account-register">
 	<h1>ZAREJESTRUJ SIĘ</h1>
-	<p>masz już konto<a href="index.php?route=account/login">
-			zaloguj się</a>
-	</p>
+	<p>Masz już konto? <a href="index.php?route=account/login">Zaloguj się</a></p>
 
 	<form id="form-register" action="{{ register }}" method="post" data-oc-toggle="ajax">
-
-		<div class="form-group required custom-field">
+		<!-- Блок для проверки NIP -->
+		<div class="register-form-group form-group required custom-field">
 			<div class="col-sm-10">
-				<input type="text" name="firstname" value="" placeholder="{{ entry_firstname }}" id="input-firstname" class="form-control"/>
-				<div id="error-firstname"></div>
-			</div>
-		</div>
-
-		<div class="form-group required custom-field">
-			<div class="col-sm-10">
-				<input type="text" name="lastname" value="" placeholder="{{ entry_lastname }}" id="input-lastname" class="form-control"/>
-				<div id="error-lastname"></div>
-			</div>
-		</div>
-
-		<div class="form-group required  custom-field" data-sort="2">
-			<div class="col-sm-10">
-				<input type="text" name="custom_field[account][1]" value="" placeholder="Nazwa firmy" id="input-custom-field1" class="form-control">
-				<div id="error-firma"></div>
-			</div>
-		</div>
-		<div class="form-group required  custom-field" data-sort="3">
-			<div class="col-sm-10">
-				<input type="text" name="custom_field[account][3]" value="" placeholder="Numer NIP" id="input-custom-field3" class="form-control">
-				<div id="error-nip"></div>
-			</div>
-		</div>
-		<div class="form-group required  custom-field" data-sort="4">
-			<div class="col-sm-10">
-				<input type="text" name="custom_field[account][4]" value="" placeholder="Pełny adres" id="input-custom-field4" class="form-control">
-				<div id="error-adres"></div>
-			</div>
-		</div>
-		<div class="form-group required  custom-field" data-sort="5">
-			<div class="col-sm-10">
-				<input type="text" name="custom_field[account][6]" value="" placeholder="Miejscowość" id="input-custom-field6" class="form-control">
-				<div id="error-misto"></div>
-			</div>
-		</div>
-		<div class="form-group required  custom-field" data-sort="6">
-			<div class="col-sm-10">
-				<input type="text" name="custom_field[account][7]" value="" placeholder="Kod pocztowy" id="input-custom-field7" class="form-control">
-				<div id="error-kod"></div>
-			</div>
-		</div>
-
-		<div class="form-group required">
-			<div class="col-sm-10">
-				<input type="email" name="email" value="" placeholder="{{ entry_email }}" id="input-email" class="form-control"/>
-				<div id="error-email"></div>
-			</div>
-		</div>
-
-		<div class="form-group required">
-			<div class="col-sm-10">
-				<input type="tel" name="telephone" value="" placeholder="{{ entry_telephone }}" id="input-telephone" class="form-control"/>
-				<div id="error-telephone"></div>
-			</div>
-		</div>
-
-		<div class="form-group required">
-			<div class="col-sm-10">
-				<input type="password" name="password" value="" placeholder="{{ entry_password }}" id="input-password" class="form-control"/>
-				<div id="error-password"></div>
-			</div>
-		</div>
-
-		<div class="form-group">
-			<div class="col-sm-10">
-				<input type="hidden" name="newsletter" value="0"/>
-				<input type="checkbox" name="newsletter" value="1" id="input-newsletter" class="form-control"/>
-				<p>Newsletter</p>
-
-			</div>
-		</div>
-
-		{{ captcha }}
-		<div class="form-group required">
-			{% if text_agree %}
-				<div class="col-sm-10">
-					<input type="checkbox" name="agree" value="1" class="form-control"/>
-					<p>Przeczytałem i zgadzam się z Regulamin sklepu</p>
+				<label for="input-nip">Numer NIP</label>
+				<div class="df aic">
+					<input type="text" name="custom_field[account][3]" value="" placeholder="Numer NIP" id="input-nip" class="form-control">
+					<button type="button" id="btn-nip" class="btn" disabled>Sprawdź</button>
 				</div>
-			{% endif %}
+				<div id="error-nip" class="form-error" style="color:red; display:none;"></div>
+			</div>
 		</div>
-		<div class="form-group">
-			<button type="submit">ZAREJESTRUJ SIĘ</button>
+
+		<!-- Остальная форма скрыта -->
+		<div id="register-form-wrapper" style="display:none;">
+
+			<div class="register-form-group form-group required custom-field">
+				<div class="col-sm-10">
+					<label for="input-firstname">{{ entry_firstname }}</label>
+					<input type="text" name="firstname" value="" placeholder="{{ entry_firstname }}" id="input-firstname" class="form-control"/>
+					<div id="error-firstname"></div>
+				</div>
+			</div>
+
+			<div class="register-form-group form-group required custom-field">
+				<div class="col-sm-10">
+					<label for="input-lastname">{{ entry_lastname }}</label>
+					<input type="text" name="lastname" value="" placeholder="{{ entry_lastname }}" id="input-lastname" class="form-control"/>
+					<div id="error-lastname"></div>
+				</div>
+			</div>
+
+			<div class="register-form-group form-group required custom-field">
+				<div class="col-sm-10">
+					<label for="input-custom-field1">Nazwa firmy</label>
+					<input type="text" name="custom_field[account][1]" value="" placeholder="Nazwa firmy" id="input-custom-field1" class="form-control"/>
+					<div id="error-firma"></div>
+				</div>
+			</div>
+
+			<div class="register-form-group form-group required custom-field">
+				<div class="col-sm-10">
+					<label for="input-custom-field4">Pełny adres</label>
+					<input type="text" name="custom_field[account][4]" value="" placeholder="Pełny adres" id="input-custom-field4" class="form-control"/>
+					<div id="error-adres"></div>
+				</div>
+			</div>
+
+			<div class="register-form-group form-group required custom-field">
+				<div class="col-sm-10">
+					<label for="input-custom-field6">Miejscowość</label>
+					<input type="text" name="custom_field[account][6]" value="" placeholder="Miejscowość" id="input-custom-field6" class="form-control"/>
+					<div id="error-miasto"></div>
+				</div>
+			</div>
+
+			<div class="register-form-group form-group required custom-field">
+				<div class="col-sm-10">
+					<label for="input-custom-field7">Kod pocztowy</label>
+					<input type="text" name="custom_field[account][7]" value="" placeholder="Kod pocztowy" id="input-custom-field7" class="form-control"/>
+					<div id="error-kod"></div>
+				</div>
+			</div>
+
+			<div class="register-form-group form-group required">
+				<div class="col-sm-10">
+					<label for="input-email">{{ entry_email }}</label>
+					<input type="email" name="email" value="" placeholder="{{ entry_email }}" id="input-email" class="form-control"/>
+					<div id="error-email"></div>
+				</div>
+			</div>
+
+			<div class="register-form-group form-group required">
+				<div class="col-sm-10">
+					<label for="input-telephone">{{ entry_telephone }}</label>
+					<input type="tel" name="telephone" value="" placeholder="{{ entry_telephone }}" id="input-telephone" class="form-control"/>
+					<div id="error-telephone"></div>
+				</div>
+			</div>
+
+			<div class="register-form-group form-group required">
+				<div class="col-sm-10">
+					<label for="input-password">{{ entry_password }}</label>
+					<input type="password" name="password" value="" placeholder="{{ entry_password }}" id="input-password" class="form-control"/>
+					<div id="error-password"></div>
+				</div>
+			</div>
+
+			<div class="form-group">
+				<div class="col-sm-10">
+					<input type="hidden" name="newsletter" value="0"/>
+					<input type="checkbox" name="newsletter" value="1" id="input-newsletter" class="form-control"/> Newsletter
+				</div>
+			</div>
+
+			{{ captcha }}
+
+			{% if text_agree %}
+			<div class="form-group required">
+				<div class="col-sm-10">
+					<input type="checkbox" name="agree" value="1" class="form-control"/> Przeczytałem i zgadzam się z regulaminem sklepu
+				</div>
+			</div>
+			{% endif %}
+
+			<div class="form-group">
+				<button type="submit">ZAREJESTRUJ SIĘ</button>
+			</div>
 		</div>
 	</form>
-
-	<div>
-		<a href="{{ login }}">{{ text_login_button }}</a>
+	<div id="register-success-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000;">
+	<div style="background:#fff; max-width:500px; margin:100px auto; padding:30px; border-radius:10px; text-align:center; font-size:18px;">
+		<h2 style="margin-bottom:20px;">Rejestracja zakończona!</h2>
+		<p>Twoje konto zostało utworzone.</p>
+		<p>Sprawdź swoją skrzynkę pocztową.</p>
+		<p>Jeżeli nie widzisz maila, sprawdź folder SPAM.</p>
+		<button id="register-success-close" style="margin-top:20px; padding:10px 20px; cursor:pointer;">Zamknij</button>
 	</div>
 </div>
 
- <script>
-$( "#form-register" ).on( "submit", function( event ) {
-  event.preventDefault();
-  $(document).find('.form-error').text('').hide();
-  $.ajax({
-	url: '/index.php?route=account/register/register',
-	type: 'post',
-	dataType: 'json',
-	data: $('#form-register').serialize(),
-	success: function(json) {
-		$('#loader').remove();
-		if(json.error) {
-			$.each(json.error, function(i, v){
-				$('#error-'+i).addClass('form-error').text(v).show();
-			});
-		} else if(json.redirect) {
-			window.location.href = json.redirect;
-		}
-		// else {
-		// 	$( "#form-register" ).trigger( "submit" ); //console.log(json);
-		// }
-	},
-	error: function(data) {
-		$('#loader').remove();
-		console.log(data.responseText);
-	}
-  });
-});
+</div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	const nipInput = document.getElementById('input-nip');
+	const nipBtn = document.getElementById('btn-nip');
+	const formWrapper = document.getElementById('register-form-wrapper');
+	const errorNip = document.getElementById('error-nip');
+	const successModal = document.getElementById('register-success-modal');
+	const closeBtn = document.getElementById('register-success-close');
+
+	let redirectUrl = '';
+
+	function toggleNipButton() {
+		const val = nipInput.value.replace(/\D/g, '');
+		nipInput.value = val;
+		nipBtn.disabled = val.length !== 10;
+	}
+
+	nipInput.addEventListener('input', toggleNipButton);
+	toggleNipButton();
+
+	nipBtn.addEventListener('click', function() {
+		errorNip.style.display = 'none';
+		$.ajax({
+			url: 'index.php?route=checkout/nip',
+			type: 'post',
+			dataType: 'json',
+			data: { nip: nipInput.value },
+			success: function(json) {
+				if (json.error) {
+					errorNip.textContent = json.error;
+					errorNip.style.display = 'block';
+					formWrapper.style.display = 'none';
+					return;
+				}
+
+				if (json.name) $('#input-custom-field1').val(json.name);
+				if (json.adress) $('#input-custom-field4').val(json.adress);
+				if (json.city) $('#input-custom-field6').val(json.city);
+				if (json.zip) $('#input-custom-field7').val(json.zip);
+
+				formWrapper.style.display = 'block';
+			},
+			error: function() {
+				errorNip.textContent = 'Błąd połączenia z serwerem.';
+				errorNip.style.display = 'block';
+			}
+		});
+	});
+
+	$('#form-register').on('submit', function(e) {
+		e.preventDefault();
+		$('.form-error').hide().text('');
+		$.ajax({
+			url: '/index.php?route=account/register/register',
+			type: 'post',
+			dataType: 'json',
+			data: $('#form-register').serialize(),
+			success: function(json) {
+				if (json.error) {
+					$.each(json.error, function(i, v){
+						$('#error-'+i).text(v).show();
+					});
+				} else if (json.redirect) {
+					redirectUrl = json.redirect;
+					successModal.style.display = 'block';
+				}
+			}
+		});
+	});
+
+	closeBtn.addEventListener('click', function() {
+		successModal.style.display = 'none';
+		if (redirectUrl) window.location.href = redirectUrl;
+	});
+
+	successModal.addEventListener('click', function(e) {
+		if (e.target.id === 'register-success-modal') {
+			successModal.style.display = 'none';
+			if (redirectUrl) window.location.href = redirectUrl;
+		}
+	});
+});
 </script>
+
 
 {{ footer }}

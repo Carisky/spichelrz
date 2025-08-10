@@ -20,3 +20,33 @@
     </div>
 </div>
 {{ footer }}
+<div id="success-order-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000;">
+  <div style="background:#fff; max-width:500px; margin:100px auto; padding:30px; border-radius:10px; text-align:center; font-size:18px;">
+    <h2 style="margin-bottom:20px;">Dziękujemy za zamówienie!</h2>
+    <p>Twoje zamówienie zostało przyjęte.</p>
+    <p>Sprawdź swoją skrzynkę pocztową.</p>
+    <p>Jeżeli nie ma wiadomości, sprawdź również folder SPAM.</p>
+    <button id="success-order-close" style="margin-top:20px; padding:10px 20px; cursor:pointer;">Zamknij</button>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const modal = document.getElementById('success-order-modal');
+  const closeBtn = document.getElementById('success-order-close');
+  
+  modal.style.display = 'block';
+  
+  closeBtn.addEventListener('click', function() {
+    modal.style.display = 'none';
+    window.location.href = '/'; // редирект на главную после закрытия
+  });
+  
+  modal.addEventListener('click', function(e) {
+    if (e.target.id === 'success-order-modal') {
+      modal.style.display = 'none';
+      window.location.href = '/';
+    }
+  });
+});
+</script>

@@ -6,12 +6,16 @@
 				<form id="form-login" action="{{ action }}" method="post" data-oc-toggle="ajax">
 					<h2>ZALOGUJ SIĘ</h2>
 					<p>WITAMY Z POWROTEM DO NAS</p>
-					<div class="form-group">
-						<input type="text" name="email" value="{{ email }}" placeholder="{{ entry_email }}" id="input-email" class="form-control"/>
-					</div>
-					<div class="form-group">
-						<input type="password" name="password" value="{{ password }}" placeholder="{{ entry_password }}" id="input-password" class="form-control mb-1"/>
-					</div>
+<div class="form-group">
+	<label for="input-email">{{ entry_email }}</label>
+	<input type="text" name="email" value="{{ email }}" placeholder="{{ entry_email }}" id="input-email" class="form-control"/>
+</div>
+
+<div class="form-group">
+	<label for="input-password">{{ entry_password }}</label>
+	<input type="password" name="password" value="{{ password }}" placeholder="{{ entry_password }}" id="input-password" class="form-control mb-1"/>
+</div>
+
 
 					<div class="text-end">
 						<button type="submit">{{ button_login }}</button>

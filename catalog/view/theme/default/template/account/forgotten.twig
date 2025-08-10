@@ -16,10 +16,10 @@
     {% else %}
     {% set class = 'col-sm-12' %}
     {% endif %}
-    <div id="content" class="{{ class }}">{{ content_top }}
+    <div  id="forgotten-password-form" class="{{ class }}">{{ content_top }}
       <h1>{{ heading_title }}</h1>
       <p>{{ text_email }}</p>
-      <form action="{{ action }}" method="post" enctype="multipart/form-data" class="form-horizontal">
+      <form action="{{ action }}"  method="post" enctype="multipart/form-data" class="form-horizontal">
       
           <!-- <legend>{{ text_your_email }}</legend> -->
           <div class="form-group required">
@@ -36,7 +36,6 @@
           </div>
         </div>
       </form>
-      {{ content_bottom }}</div>
-    {{ column_right }}</div>
+</div>
 </div>
 {{ footer }}

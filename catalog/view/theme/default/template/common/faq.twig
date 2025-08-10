@@ -1,95 +1,155 @@
 {% if faqs %}
-<div class="faq-list" itemscope itemtype="https://schema.org/FAQPage">
+<section class="faq" itemscope itemtype="https://schema.org/FAQPage">
   {% for faq in faqs %}
-    <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
-      <div class="faq-question" itemprop="name">{{ faq.question|raw }}</div>
-      <div class="faq-answer-wrapper" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-        <div class="faq-answer" itemprop="text">
+    <article class="faq__item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+      <h3 class="faq__title">
+        <button
+          class="faq__button"
+          type="button"
+          aria-expanded="false"
+          aria-controls="faq-a-{{ loop.index }}"
+          id="faq-q-{{ loop.index }}"
+        >
+          <span class="faq__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" class="faq__chevron" width="20" height="20">
+              <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="faq__question" itemprop="name">{{ faq.question|raw }}</span>
+        </button>
+      </h3>
+
+      <div
+        class="faq__answerWrap"
+        id="faq-a-{{ loop.index }}"
+        role="region"
+        aria-labelledby="faq-q-{{ loop.index }}"
+        itemscope
+        itemprop="acceptedAnswer"
+        itemtype="https://schema.org/Answer"
+      >
+        <div class="faq__answer" itemprop="text">
           {{ faq.answer|raw }}
         </div>
       </div>
-    </div>
+    </article>
   {% endfor %}
-</div>
+</section>
 
 <style>
-.faq-list {
-  margin: 2rem auto;
-  margin-left:20px;
-  margin-right:20px;
+.faq {
+  --faq-radius: .5rem;
+  --faq-border: #e6e6e6;
+  --faq-bg: #fff;
+  --faq-muted: #666;
+  --faq-accent: #2b7cff;
+  margin: 2rem 20px;
 }
 
-.faq-item {
-  border: 1px solid #e0e0e0;
-  border-radius: .5rem;
+.faq__item {
+  border: 1px solid var(--faq-border);
+  border-left: 4px solid var(--faq-accent);
+  border-radius: var(--faq-radius);
+  background: var(--faq-bg);
   margin-bottom: 1rem;
   overflow: hidden;
   transition: box-shadow .2s ease;
 }
+.faq__item:hover { box-shadow: 0 4px 14px rgba(0,0,0,.08); }
 
-.faq-item:hover {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
+.faq__title { margin: 0; }
 
-.faq-question {
-  display: flex;
+.faq__button {
+  width: 100%;
+  text-align: left;
+  display: grid;
+  grid-template-columns: 24px 1fr;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 1.5rem;
-  background: #fafafa;
+  gap: .75rem;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(#fafafa, #f7f7f7);
+  border: 0;
   cursor: pointer;
   font-weight: 600;
   position: relative;
 }
 
-.faq-question::after {
-  content: '+';
-  position: absolute;
-  right: 1.5rem;
-  top: 50%;
-  transform: translateY(-50%);
+.faq__icon { display: inline-flex; justify-content: center; align-items: center; }
+.faq__chevron {
   transition: transform .2s ease;
-  font-size: 1.25rem;
 }
 
-.faq-item.active .faq-question::after {
-  transform: translateY(-50%) rotate(45deg);
+.faq__button[aria-expanded="true"] .faq__chevron {
+  transform: rotate(180deg);
 }
 
-.faq-answer {
-  max-height: 0;
-  padding: 0 1.5rem;
-  color: #555;
-  line-height: 1.5;
-  overflow: hidden;
-  transition: max-height .3s ease, padding .3s ease;
-}
-
-.faq-item.active .faq-answer {
-  padding: 1rem 1.5rem;
-  max-height: 500px;
-}
-
-/* Обёртка для иконки и текста, если нужно */
-.faq-icon {
-  flex-shrink: 0;
-  font-size: 1.25rem;
-  line-height: 1;
-}
-
-.faq-text {
+.faq__question {
   white-space: normal;
   word-break: break-word;
-  flex: 1;
 }
 
+.faq__answerWrap {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height .3s ease, padding .3s ease;
+  padding: 0 1.25rem;
+}
+
+.faq__answerWrap.is-open {
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.faq__answer {
+  color: var(--faq-muted);
+  line-height: 1.6;
+}
+
+/* Уважение к пользователям с ограничениями по анимации */
+@media (prefers-reduced-motion: reduce) {
+  .faq__chevron,
+  .faq__answerWrap {
+    transition: none;
+  }
+}
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('.faq-question').forEach(function(q){
-    q.addEventListener('click', function(){
-      this.parentNode.classList.toggle('active');
+document.addEventListener('DOMContentLoaded', function () {
+  const items = document.querySelectorAll('.faq__item');
+
+  items.forEach((item) => {
+    const btn = item.querySelector('.faq__button');
+    const panel = item.querySelector('.faq__answerWrap');
+
+    // Инициализация высоты (свёрнуто)
+    panel.style.maxHeight = '0px';
+
+    btn.addEventListener('click', () => {
+      const expanded = btn.getAttribute('aria-expanded') === 'true';
+
+      if (expanded) {
+        // Закрыть
+        panel.style.maxHeight = panel.scrollHeight + 'px'; // зафиксировать текущую
+        requestAnimationFrame(() => {
+          panel.style.maxHeight = '0px';
+          panel.classList.remove('is-open');
+          btn.setAttribute('aria-expanded', 'false');
+        });
+      } else {
+        // Открыть
+        panel.classList.add('is-open');
+        panel.style.maxHeight = panel.scrollHeight + 'px';
+        btn.setAttribute('aria-expanded', 'true');
+
+        // После анимации — auto (для адаптивности, если контент меняется)
+        const onTransitionEnd = (e) => {
+          if (e.propertyName === 'max-height') {
+            panel.style.maxHeight = 'none';
+            panel.removeEventListener('transitionend', onTransitionEnd);
+          }
+        };
+        panel.addEventListener('transitionend', onTransitionEnd);
+      }
     });
   });
 });

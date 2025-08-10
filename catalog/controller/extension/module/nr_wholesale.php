@@ -298,8 +298,10 @@ class ControllerExtensionModuleNrWholesale extends Controller
         $primary_discount = $this->config->get('module_nr_wholesale_discount');
         $amount = 0;
         $amounttax = 0;
+        
         foreach ($cart_products as &$product) {
             if (!$product['quantity']) continue;
+            
             $product_info = $this->model_catalog_product->getProduct($product['product_id']); //print_r($product_info);
             $price = round($product['price'] - ($product['price'] / 100 * $primary_discount), 2);
             $vat = round(($product_info['tax_class_id'] ? $this->tax->getTax($price, $product_info['tax_class_id']) : 0), 2);
@@ -343,11 +345,12 @@ class ControllerExtensionModuleNrWholesale extends Controller
         if ($total > 1500) {
             $shipping = 0;
         } else {
-            $shipping = isset($this->session->data['shipping_method']['cost']) ? $this->session->data['shipping_method']['cost'] : 0;
+            //$shipping = isset($this->session->data['shipping_method']['cost']) ? $this->session->data['shipping_method']['cost'] : 0;
             $total += $shipping;
         }
-        if ($total > 1500) $shipping = 0;
-        else $total += $shipping;
+
+        // if ($total > 1500) $shipping = 0;
+        // else $total += $shipping;
 
         $data = [
             'subtotal' => $this->currency->format($subtotal, $this->session->data['currency']),

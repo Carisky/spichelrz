@@ -5316,9 +5316,8 @@ form div button {
   height: 60%;
   margin: auto;
 }
-#account-login .form-group {
-  display: flex;
-  justify-content: center;
+#account-login .form-group label{
+  font-weight: 600;
 }
 #account-login p {
   font-family: Montserrat;
@@ -5384,6 +5383,14 @@ form div button {
 }
 #account-register .form-group .col-sm-10 input[type="checkbox"] {
   margin-right: 10px;
+}
+#account-register .register-form-group .col-sm-10 {
+  display: block;
+  align-items: center;
+}
+#forgotten-password-form{
+  width: 80%;
+  margin: auto;
 }
 .pagination-btn {
   align-items: center;
@@ -5696,4 +5703,5 @@ form div button {
   #second-page #menu-bottom{
     font-size: 20px;
   }
+  
 }
