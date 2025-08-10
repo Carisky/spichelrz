@@ -109,6 +109,20 @@ class ControllerAccountRegister extends Controller {
 
             // Always require admin approval for new accounts
             $data['approval'] = true;
+            $this->load->model('account/customer_group');
+            if (isset($this->request->post['customer_group_id'])) {
+                $customer_group_id = (int)$this->request->post['customer_group_id'];
+            } else {
+                $customer_group_id = $this->config->get('config_customer_group_id');
+            }
+
+            $customer_group_info = $this->model_account_customer_group->getCustomerGroup($customer_group_id);
+
+            if ($customer_group_info) {
+                $data['approval'] = $customer_group_info['approval'];
+            } else {
+                $data['approval'] = '';
+            }
 
             $data['login'] = $this->url->link('account/login', '', true);
             $data['store'] = html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8');
@@ -128,6 +142,8 @@ class ControllerAccountRegister extends Controller {
             $mail->setText($this->load->view('mail/register', $data));
             $mail->send();
 
+            $this->customer->login($this->request->post['email'], $this->request->post['password']);
+            $this->session->data['customer_id'] = $customer_id;
             $json['redirect'] = $this->url->link('account/edit');
         }
 
