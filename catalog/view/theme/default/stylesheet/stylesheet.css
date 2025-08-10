@@ -1083,9 +1083,9 @@ h2 {
   color: #987253;
   min-width: 0;
 
-  max-width: 120px;
+  max-width: 220px;
   white-space: nowrap;
-  /*overflow: hidden;*/
+  overflow: hidden;
   text-overflow: ellipsis;
 }
 @media screen and (max-width: 768px) {
@@ -2099,9 +2099,6 @@ textarea {
   .contact-us main .left .title {
     justify-content: center;
   }
-  /* .breadcrumbs{
-        justify-content: center;
-    } */
 }
 
 h2 {

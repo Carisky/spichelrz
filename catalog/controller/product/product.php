@@ -530,7 +530,7 @@ class ControllerProductProduct extends Controller {
 					$this->config->get('theme_' . $this->config->get('config_theme') . '_image_popup_height')
 				);
 			}
-			exit;
+
 			if($product_info['meta_description']){
 
 			$schema['description'] = $product_info['meta_description'];

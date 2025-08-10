@@ -1,8 +1,10 @@
 <?php
-class ControllerCustomerCustomer extends Controller {
+class ControllerCustomerCustomer extends Controller
+{
 	private $error = array();
 
-	public function index() {
+	public function index()
+	{
 		$this->load->language('customer/customer');
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -12,7 +14,8 @@ class ControllerCustomerCustomer extends Controller {
 		$this->getList();
 	}
 
-	public function add() {
+	public function add()
+	{
 		$this->load->language('customer/customer');
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -68,119 +71,145 @@ class ControllerCustomerCustomer extends Controller {
 		$this->getForm();
 	}
 
-	public function edit() {
+	public function edit()
+	{
 		$this->load->language('customer/customer');
-
 		$this->document->setTitle($this->language->get('heading_title'));
-
 		$this->load->model('customer/customer');
 
-                if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
-                        $customer_info = $this->model_customer_customer->getCustomer($this->request->get['customer_id']);
+		if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validateForm()) {
+			$customer_id   = (int)$this->request->get['customer_id'];
+			$customer_info = $this->model_customer_customer->getCustomer($customer_id);
 
-                        $this->model_customer_customer->editCustomer($this->request->get['customer_id'], $this->request->post);
+			$this->model_customer_customer->editCustomer($customer_id, $this->request->post);
 
-                        if (!$customer_info['status'] && !empty($this->request->post['status'])) {
-                                $this->load->model('setting/store');
+			// Лог и проверка смены статуса 0 -> 1
+			$old = (int)$customer_info['status'];
+			$new = (int)!empty($this->request->post['status']);
+			$log = new Log('customer_status.log');
 
-                                $store_info = $this->model_setting_store->getStore($customer_info['store_id']);
+			if (!$old && $new) {
+				$log->write("TRIGGER: customer_id={$customer_id}, email={$customer_info['email']}, status {$old} -> {$new}");
 
-                                if ($store_info) {
-                                        $store_name = html_entity_decode($store_info['name'], ENT_QUOTES, 'UTF-8');
-                                        $store_url = $store_info['url'];
-                                } else {
-                                        $store_name = html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8');
-                                        $store_url = HTTP_CATALOG;
-                                }
+				// Данные магазина
+				$this->load->model('setting/store');
+				$store_info = $this->model_setting_store->getStore($customer_info['store_id']);
 
-                                $this->load->model('localisation/language');
+				if ($store_info) {
+					$store_name = html_entity_decode($store_info['name'], ENT_QUOTES, 'UTF-8');
+					$store_url  = $store_info['url'];
+				} else {
+					$store_name = html_entity_decode($this->config->get('config_name'), ENT_QUOTES, 'UTF-8');
+					$store_url  = HTTP_CATALOG;
+				}
 
-                                $language_info = $this->model_localisation_language->getLanguage($customer_info['language_id']);
+				// Язык письма
+				$this->load->model('localisation/language');
+				$language_info = $this->model_localisation_language->getLanguage($customer_info['language_id']);
+				$language_code = $language_info ? $language_info['code'] : $this->config->get('config_language');
 
-                                if ($language_info) {
-                                        $language_code = $language_info['code'];
-                                } else {
-                                        $language_code = $this->config->get('config_language');
-                                }
+				$language = new Language($language_code);
+				$language->load($language_code);
+				$language->load('mail/customer_approve');
 
-                                $language = new Language($language_code);
-                                $language->load($language_code);
-                                $language->load('mail/customer_approve');
+				$subject = sprintf($language->get('text_subject'), $store_name);
+				$subject = str_replace(array("\r", "\n"), ' ', $subject);
 
-                                $subject = sprintf($language->get('text_subject'), $store_name);
+				$data = [];
+				$data['text_welcome'] = sprintf($language->get('text_welcome'), $store_name);
+				$data['text_login']   = $language->get('text_login');
+				$data['text_service'] = $language->get('text_service');
+				$data['text_thanks']  = $language->get('text_thanks');
+				$data['login']        = $store_url . 'index.php?route=account/login';
+				$data['store']        = $store_name;
 
-                                $data = [];
-                                $data['text_welcome'] = sprintf($language->get('text_welcome'), $store_name);
-                                $data['text_login'] = $language->get('text_login');
-                                $data['text_service'] = $language->get('text_service');
-                                $data['text_thanks'] = $language->get('text_thanks');
+				$html = $this->load->view('mail/customer_approve', $data);
 
-                                $data['login'] = $store_url . 'index.php?route=account/login';
-                                $data['store'] = $store_name;
+				// Корректный From + envelope-from
+				$host = parse_url($store_url ?: HTTP_CATALOG, PHP_URL_HOST);
+				$host = $host ? preg_replace('~^www\.~', '', $host) : '';
+				$from_cfg = (string)$this->config->get('config_email');
+				$from_ok  = (bool)filter_var($from_cfg, FILTER_VALIDATE_EMAIL)
+					&& $host && strlen($host) > 0
+					&& (strlen($from_cfg) >= strlen($host))
+					&& (strcasecmp(substr($from_cfg, -strlen($host)), $host) === 0);
+				$from = $from_ok ? $from_cfg : ('no-reply@' . $host);
 
-                                $mail = new Mail($this->config->get('config_mail_engine'));
-                                $mail->parameter = $this->config->get('config_mail_parameter');
-                                $mail->smtp_hostname = $this->config->get('config_mail_smtp_hostname');
-                                $mail->smtp_username = $this->config->get('config_mail_smtp_username');
-                                $mail->smtp_password = html_entity_decode($this->config->get('config_mail_smtp_password'), ENT_QUOTES, 'UTF-8');
-                                $mail->smtp_port = $this->config->get('config_mail_smtp_port');
-                                $mail->smtp_timeout = $this->config->get('config_mail_smtp_timeout');
+				// Попытка 1: engine=mail (без SMTP)
+				$engine = 'mail';
+				$mail = new Mail($engine);
+				$mail->parameter = '-f ' . $from; // envelope sender
+				$mail->setTo($customer_info['email']);
+				$mail->setFrom($from);
+				$mail->setSender($store_name);
+				$mail->setSubject(html_entity_decode($subject, ENT_QUOTES, 'UTF-8'));
+				$mail->setHtml($html);
+				$mail->setText(strip_tags(html_entity_decode($html, ENT_QUOTES, 'UTF-8')));
 
-                                $mail->setTo($customer_info['email']);
-                                $mail->setFrom($this->config->get('config_email'));
-                                $mail->setSender($store_name);
-                                $mail->setSubject($subject);
-                                $mail->setText($this->load->view('mail/customer_approve', $data));
-                                $mail->send();
-                        }
+				$this->log->write("MAIL DEBUG: to={$customer_info['email']} from={$from} subj={$subject} engine={$engine}");
 
-                        $this->session->data['success'] = $this->language->get('text_success');
+				$sent = false;
+				try {
+					$mail->send();
+					$sent = true;
+					$log->write("MAIL: success (engine=mail) customer_id={$customer_id}");
+				} catch (\Exception $e) {
+					$this->log->write('Customer approve mail error (mail): ' . $e->getMessage());
+					$log->write("MAIL: failed (engine=mail) customer_id={$customer_id}: " . $e->getMessage());
+				}
 
-                        $url = '';
+				// Фолбэк: sendmail
+				if (!$sent) {
+					try {
+						$engine = 'sendmail';
+						$mail = new Mail($engine);
+						$mail->parameter = $this->config->get('config_mail_parameter') ?: '/usr/sbin/sendmail -t -i';
 
-			if (isset($this->request->get['filter_name'])) {
-				$url .= '&filter_name=' . urlencode(html_entity_decode($this->request->get['filter_name'], ENT_QUOTES, 'UTF-8'));
+						$mail->setTo($customer_info['email']);
+						$mail->setFrom($from);
+						$mail->setSender($store_name);
+						$mail->setSubject(html_entity_decode($subject, ENT_QUOTES, 'UTF-8'));
+						$mail->setHtml($html);
+						$mail->setText(strip_tags(html_entity_decode($html, ENT_QUOTES, 'UTF-8')));
+
+						$this->log->write("MAIL DEBUG: retry engine={$engine}, param={$mail->parameter}");
+						$mail->send();
+						$sent = true;
+						$log->write("MAIL: success (engine=sendmail) customer_id={$customer_id}");
+					} catch (\Exception $e) {
+						$this->log->write('Customer approve mail error (sendmail): ' . $e->getMessage());
+						$log->write("MAIL: failed (engine=sendmail) customer_id={$customer_id}: " . $e->getMessage());
+					}
+				}
+			} else {
+				$log->write("SKIP: customer_id={$customer_id}, status {$old} -> {$new} (условие 0->1 не выполнено)");
 			}
 
-			if (isset($this->request->get['filter_email'])) {
-				$url .= '&filter_email=' . urlencode(html_entity_decode($this->request->get['filter_email'], ENT_QUOTES, 'UTF-8'));
-			}
+			// Редирект
+			$url = '';
+			if (isset($this->request->get['filter_name']))  $url .= '&filter_name='  . urlencode(html_entity_decode($this->request->get['filter_name'], ENT_QUOTES, 'UTF-8'));
+			if (isset($this->request->get['filter_email'])) $url .= '&filter_email=' . urlencode(html_entity_decode($this->request->get['filter_email'], ENT_QUOTES, 'UTF-8'));
+			if (isset($this->request->get['filter_customer_group_id'])) $url .= '&filter_customer_group_id=' . $this->request->get['filter_customer_group_id'];
+			if (isset($this->request->get['filter_status'])) $url .= '&filter_status=' . $this->request->get['filter_status'];
+			if (isset($this->request->get['filter_ip']))     $url .= '&filter_ip=' . $this->request->get['filter_ip'];
+			if (isset($this->request->get['filter_date_added'])) $url .= '&filter_date_added=' . $this->request->get['filter_date_added'];
+			if (isset($this->request->get['sort']))  $url .= '&sort=' . $this->request->get['sort'];
+			if (isset($this->request->get['order'])) $url .= '&order=' . $this->request->get['order'];
+			if (isset($this->request->get['page']))  $url .= '&page=' . $this->request->get['page'];
 
-			if (isset($this->request->get['filter_customer_group_id'])) {
-				$url .= '&filter_customer_group_id=' . $this->request->get['filter_customer_group_id'];
-			}
-
-			if (isset($this->request->get['filter_status'])) {
-				$url .= '&filter_status=' . $this->request->get['filter_status'];
-			}
-
-			if (isset($this->request->get['filter_ip'])) {
-				$url .= '&filter_ip=' . $this->request->get['filter_ip'];
-			}
-
-			if (isset($this->request->get['filter_date_added'])) {
-				$url .= '&filter_date_added=' . $this->request->get['filter_date_added'];
-			}
-
-			if (isset($this->request->get['sort'])) {
-				$url .= '&sort=' . $this->request->get['sort'];
-			}
-
-			if (isset($this->request->get['order'])) {
-				$url .= '&order=' . $this->request->get['order'];
-			}
-
-			if (isset($this->request->get['page'])) {
-				$url .= '&page=' . $this->request->get['page'];
-			}
-
+			$this->session->data['success'] = $this->language->get('text_success');
 			$this->response->redirect($this->url->link('customer/customer', 'user_token=' . $this->session->data['user_token'] . $url, true));
 		}
 
 		$this->getForm();
 	}
 
-	public function delete() {
+
+
+
+
+	public function delete()
+	{
 		$this->load->language('customer/customer');
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -238,7 +267,8 @@ class ControllerCustomerCustomer extends Controller {
 		$this->getList();
 	}
 
-	public function unlock() {
+	public function unlock()
+	{
 		$this->load->language('customer/customer');
 
 		$this->document->setTitle($this->language->get('heading_title'));
@@ -294,7 +324,8 @@ class ControllerCustomerCustomer extends Controller {
 		$this->getList();
 	}
 
-	protected function getList() {
+	protected function getList()
+	{
 		if (isset($this->request->get['filter_name'])) {
 			$filter_name = $this->request->get['filter_name'];
 		} else {
@@ -592,7 +623,8 @@ class ControllerCustomerCustomer extends Controller {
 		$this->response->setOutput($this->load->view('customer/customer_list', $data));
 	}
 
-	protected function getForm() {
+	protected function getForm()
+	{
 		$data['text_form'] = !isset($this->request->get['customer_id']) ? $this->language->get('text_add') : $this->language->get('text_edit');
 
 		$data['user_token'] = $this->session->data['user_token'];
@@ -833,14 +865,14 @@ class ControllerCustomerCustomer extends Controller {
 				'sort_order'         => $custom_field['sort_order']
 			);
 
-			if($custom_field['type'] == 'file') {
-				if(isset($data['account_custom_field'][$custom_field['custom_field_id']])) {
+			if ($custom_field['type'] == 'file') {
+				if (isset($data['account_custom_field'][$custom_field['custom_field_id']])) {
 					$code = $data['account_custom_field'][$custom_field['custom_field_id']];
 
 					$upload_result = $this->model_tool_upload->getUploadByCode($code);
 
 					$data['account_custom_field'][$custom_field['custom_field_id']] = array();
-					if($upload_result) {
+					if ($upload_result) {
 						$data['account_custom_field'][$custom_field['custom_field_id']]['name'] = $upload_result['name'];
 						$data['account_custom_field'][$custom_field['custom_field_id']]['code'] = $upload_result['code'];
 					} else {
@@ -849,14 +881,14 @@ class ControllerCustomerCustomer extends Controller {
 					}
 				}
 
-				foreach($data['addresses'] as $address_id => $address) {
-					if(isset($address['custom_field'][$custom_field['custom_field_id']])) {
+				foreach ($data['addresses'] as $address_id => $address) {
+					if (isset($address['custom_field'][$custom_field['custom_field_id']])) {
 						$code = $address['custom_field'][$custom_field['custom_field_id']];
 
 						$upload_result = $this->model_tool_upload->getUploadByCode($code);
-						
+
 						$data['addresses'][$address_id]['custom_field'][$custom_field['custom_field_id']] = array();
-						if($upload_result) {
+						if ($upload_result) {
 							$data['addresses'][$address_id]['custom_field'][$custom_field['custom_field_id']]['name'] = $upload_result['name'];
 							$data['addresses'][$address_id]['custom_field'][$custom_field['custom_field_id']]['code'] = $upload_result['code'];
 						} else {
@@ -1048,7 +1080,8 @@ class ControllerCustomerCustomer extends Controller {
 		$this->response->setOutput($this->load->view('customer/customer_form', $data));
 	}
 
-	protected function validateForm() {
+	protected function validateForm()
+	{
 		if (!$this->user->hasPermission('modify', 'customer/customer')) {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
@@ -1143,7 +1176,7 @@ class ControllerCustomerCustomer extends Controller {
 						$this->error['address'][$key]['custom_field'][$custom_field['custom_field_id']] = sprintf($this->language->get('error_custom_field'), $custom_field['name']);
 					} elseif (($custom_field['location'] == 'address') && ($custom_field['type'] == 'text') && !empty($custom_field['validation']) && !filter_var($value['custom_field'][$custom_field['custom_field_id']], FILTER_VALIDATE_REGEXP, array('options' => array('regexp' => $custom_field['validation'])))) {
 						$this->error['address'][$key]['custom_field'][$custom_field['custom_field_id']] = sprintf($this->language->get('error_custom_field'), $custom_field['name']);
-                    }
+					}
 				}
 			}
 		}
@@ -1199,7 +1232,8 @@ class ControllerCustomerCustomer extends Controller {
 		return !$this->error;
 	}
 
-	protected function validateDelete() {
+	protected function validateDelete()
+	{
 		if (!$this->user->hasPermission('modify', 'customer/customer')) {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
@@ -1207,7 +1241,8 @@ class ControllerCustomerCustomer extends Controller {
 		return !$this->error;
 	}
 
-	protected function validateUnlock() {
+	protected function validateUnlock()
+	{
 		if (!$this->user->hasPermission('modify', 'customer/customer')) {
 			$this->error['warning'] = $this->language->get('error_permission');
 		}
@@ -1215,7 +1250,8 @@ class ControllerCustomerCustomer extends Controller {
 		return !$this->error;
 	}
 
-	public function login() {
+	public function login()
+	{
 		if (isset($this->request->get['customer_id'])) {
 			$customer_id = $this->request->get['customer_id'];
 		} else {
@@ -1272,7 +1308,8 @@ class ControllerCustomerCustomer extends Controller {
 		}
 	}
 
-	public function history() {
+	public function history()
+	{
 		$this->load->language('customer/customer');
 
 		$this->load->model('customer/customer');
@@ -1311,7 +1348,8 @@ class ControllerCustomerCustomer extends Controller {
 		$this->response->setOutput($this->load->view('customer/customer_history', $data));
 	}
 
-	public function addHistory() {
+	public function addHistory()
+	{
 		$this->load->language('customer/customer');
 
 		$json = array();
@@ -1330,7 +1368,8 @@ class ControllerCustomerCustomer extends Controller {
 		$this->response->setOutput(json_encode($json));
 	}
 
-	public function transaction() {
+	public function transaction()
+	{
 		$this->load->language('customer/customer');
 
 		$this->load->model('customer/customer');
@@ -1372,7 +1411,8 @@ class ControllerCustomerCustomer extends Controller {
 		$this->response->setOutput($this->load->view('customer/customer_transaction', $data));
 	}
 
-	public function addTransaction() {
+	public function addTransaction()
+	{
 		$this->load->language('customer/customer');
 
 		$json = array();
@@ -1391,7 +1431,8 @@ class ControllerCustomerCustomer extends Controller {
 		$this->response->setOutput(json_encode($json));
 	}
 
-	public function reward() {
+	public function reward()
+	{
 		$this->load->language('customer/customer');
 
 		$this->load->model('customer/customer');
@@ -1433,7 +1474,8 @@ class ControllerCustomerCustomer extends Controller {
 		$this->response->setOutput($this->load->view('customer/customer_reward', $data));
 	}
 
-	public function addReward() {
+	public function addReward()
+	{
 		$this->load->language('customer/customer');
 
 		$json = array();
@@ -1452,7 +1494,8 @@ class ControllerCustomerCustomer extends Controller {
 		$this->response->setOutput(json_encode($json));
 	}
 
-	public function ip() {
+	public function ip()
+	{
 		$this->load->language('customer/customer');
 
 		$this->load->model('customer/customer');
@@ -1493,7 +1536,8 @@ class ControllerCustomerCustomer extends Controller {
 		$this->response->setOutput($this->load->view('customer/customer_ip', $data));
 	}
 
-	public function autocomplete() {
+	public function autocomplete()
+	{
 		$json = array();
 
 		if (isset($this->request->get['filter_name']) || isset($this->request->get['filter_email'])) {
@@ -1555,7 +1599,8 @@ class ControllerCustomerCustomer extends Controller {
 		$this->response->setOutput(json_encode($json));
 	}
 
-	public function customfield() {
+	public function customfield()
+	{
 		$json = array();
 
 		$this->load->model('customer/custom_field');
@@ -1580,7 +1625,8 @@ class ControllerCustomerCustomer extends Controller {
 		$this->response->setOutput(json_encode($json));
 	}
 
-	public function address() {
+	public function address()
+	{
 		$json = array();
 
 		if (!empty($this->request->get['address_id'])) {
