@@ -372,6 +372,33 @@ class ControllerExtensionModuleNrWholesale extends Controller
         $address = $this->request->post['address'];
         $products = $this->request->post['product'];
 
+        // обновляем адрес доставки в сессии, чтобы методы оплаты/доставки
+        // рассчитывались исходя из актуальных данных
+        $this->session->data['shipping_address'] = $address;
+
+        // Сохраняем выбранный метод доставки, если он передан
+        if (isset($this->request->post['shipping_method'])) {
+            $shipping_methods = $this->updateShippingMethods();
+            foreach ($shipping_methods as $method) {
+                if (!empty($method['quote'])) {
+                    foreach ($method['quote'] as $quote) {
+                        if ($quote['code'] == $this->request->post['shipping_method']) {
+                            $this->session->data['shipping_method'] = $quote;
+                            break 2;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Сохраняем выбранный метод оплаты, если он передан
+        if (isset($this->request->post['payment_method'])) {
+            $payment_methods = $this->updatePaymentMethods();
+            if (isset($payment_methods[$this->request->post['payment_method']])) {
+                $this->session->data['payment_method'] = $payment_methods[$this->request->post['payment_method']];
+            }
+        }
+
         // 1) Собираем все ошибки
         $error = $this->validateAddress($address, $products);
         if (!$error) {
