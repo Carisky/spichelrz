@@ -88,7 +88,6 @@ $_['text_sale'] = 'Sprzedaż';
 $_['text_shipping'] = 'Dostawa';
 $_['text_setting'] = 'Ustawienia';
 $_['text_seo_url'] = 'URL SEO';
-$_['text_city'] = 'Miasta';
 $_['text_statistics'] = 'Statystyki';
 $_['text_stock_status'] = 'Stan zapasów';
 $_['text_system'] = 'System';
