@@ -1,18 +1,56 @@
 <?php
-class ControllerStartupSeoUrl extends Controller {
-	public function index() {
-		// Add rewrite to url class
+class ControllerStartupSeoUrl extends Controller
+{
+	private $seo_pro;
+
+	public function __construct($registry)
+	{
+		parent::__construct($registry);
+		$this->seo_pro = new SeoPro($registry);
+	}
+
+	public function index()
+	{
 		if ($this->config->get('config_seo_url')) {
 			$this->url->addRewrite($this);
+
+      // OCFilter start
+      if ($this->registry->has('ocfilter')) {
+  			$this->url->addRewrite($this->ocfilter);
+  		}
+      // OCFilter end
+      
+
+			// OCFilter start
+			if ($this->registry->has('ocfilter')) {
+				$this->url->addRewrite($this->ocfilter);
+			}
+			// OCFilter end
+
 		}
 
-		// Decode URL
 		if (isset($this->request->get['_route_'])) {
+
 			$parts = explode('/', $this->request->get['_route_']);
 
-			// remove any empty arrays from trailing
+			if ($this->config->get('config_seo_pro')) {
+				//$parts = $this->seo_pro->prepareRoute($parts);
+			}
+
 			if (utf8_strlen(end($parts)) == 0) {
 				array_pop($parts);
+			}
+
+			// Virtual city prefix
+			$city = '';
+			if ($parts) {
+				$city_query = $this->db->query("SELECT city_id FROM `" . DB_PREFIX . "city` WHERE keyword = '" . $this->db->escape($parts[0]) . "' AND status = '1'");
+
+				if ($city_query->num_rows) {
+					$city = $parts[0];
+					$this->request->get['city'] = $city;
+					array_shift($parts); // ← ВАЖНО: удаляем город из массива
+				}
 			}
 
 			foreach ($parts as $part) {
@@ -23,38 +61,21 @@ class ControllerStartupSeoUrl extends Controller {
 
 					if ($url[0] == 'product_id') {
 						$this->request->get['product_id'] = $url[1];
-					}
-					if ($url[0] == 'blog_category_id') {
-						$this->request->get['blog_category_id'] = $url[1];
-						$this->request->get['route'] = "blog/category";
-					}
-					if ($url[0] == 'article_id') {
-						$this->request->get['article_id'] = $url[1];
-						$this->request->get['route'] = "blog/article";
-					}
-
-					if ($url[0] == 'category_id') {
+					} elseif ($url[0] == 'category_id') {
 						if (!isset($this->request->get['path'])) {
 							$this->request->get['path'] = $url[1];
 						} else {
 							$this->request->get['path'] .= '_' . $url[1];
 						}
-					}
-
-					if ($url[0] == 'manufacturer_id') {
+					} elseif ($url[0] == 'manufacturer_id') {
 						$this->request->get['manufacturer_id'] = $url[1];
-					}
-
-					if ($url[0] == 'information_id') {
+					} elseif ($url[0] == 'information_id') {
 						$this->request->get['information_id'] = $url[1];
-					}
-
-					if ($query->row['query'] && $url[0] != 'information_id' && $url[0] != 'manufacturer_id' && $url[0] != 'category_id' && $url[0] != 'product_id' && $url[0] != 'blog_category_id' && $url[0] != 'article_id') {
+					} else {
 						$this->request->get['route'] = $query->row['query'];
 					}
 				} else {
 					$this->request->get['route'] = 'error/not_found';
-
 					break;
 				}
 			}
@@ -68,70 +89,111 @@ class ControllerStartupSeoUrl extends Controller {
 					$this->request->get['route'] = 'product/manufacturer/info';
 				} elseif (isset($this->request->get['information_id'])) {
 					$this->request->get['route'] = 'information/information';
-				}elseif (isset($this->request->get['article_id'])) {
-					$this->request->get['route'] = 'blog/article';
 				}
 			}
 		}
+
+
+		if ($this->config->get('config_seo_pro')) {
+			$this->seo_pro->validate();
+		}
 	}
 
-	public function rewrite($link) {
+	public function rewrite($link)
+	{
 		$url_info = parse_url(str_replace('&amp;', '&', $link));
+		$url = $this->config->get('config_seo_pro') ? null : '';
 
-		$url = '';
-
-		$data = array();
-
+		$data = [];
 		parse_str($url_info['query'], $data);
+
+		$city = '';
+		if (isset($data['city'])) {
+			$city = '/' . trim($data['city']);
+			unset($data['city']);
+		}
+
+		$postfix = '';
+		if ($this->config->get('config_seo_pro')) {
+			list($url, $data, $postfix) = $this->seo_pro->baseRewrite($data, (int)$this->config->get('config_language_id'));
+		}
 
 		foreach ($data as $key => $value) {
 			if (isset($data['route'])) {
-				if (($data['route'] == 'product/product' && $key == 'product_id') || (($data['route'] == 'product/manufacturer/info' || $data['route'] == 'product/product') && $key == 'manufacturer_id') || ($data['route'] == 'information/information' && $key == 'information_id') || ($data['route'] == 'blog/article' && $key == 'article_id')) {
+				if (($data['route'] == 'product/product' && $key == 'product_id') || (($data['route'] == 'product/manufacturer/info' || $data['route'] == 'product/product') && $key == 'manufacturer_id') || ($data['route'] == 'information/information' && $key == 'information_id')) {
 					$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "seo_url WHERE `query` = '" . $this->db->escape($key . '=' . (int)$value) . "' AND store_id = '" . (int)$this->config->get('config_store_id') . "' AND language_id = '" . (int)$this->config->get('config_language_id') . "'");
 
 					if ($query->num_rows && $query->row['keyword']) {
 						$url .= '/' . $query->row['keyword'];
-
 						unset($data[$key]);
 					}
 				} elseif ($key == 'path') {
 					$categories = explode('_', $value);
-
 					foreach ($categories as $category) {
 						$query = $this->db->query("SELECT * FROM " . DB_PREFIX . "seo_url WHERE `query` = 'category_id=" . (int)$category . "' AND store_id = '" . (int)$this->config->get('config_store_id') . "' AND language_id = '" . (int)$this->config->get('config_language_id') . "'");
-
 						if ($query->num_rows && $query->row['keyword']) {
 							$url .= '/' . $query->row['keyword'];
 						} else {
 							$url = '';
-
 							break;
 						}
 					}
-
 					unset($data[$key]);
 				}
 			}
 		}
 
-		if ($url) {
-			unset($data['route']);
+		unset($data['route']);
+		$query = '';
+		if ($data) {
+			foreach ($data as $key => $value) {
+				$query .= '&' . rawurlencode((string)$key) . '=' . rawurlencode((is_array($value) ? http_build_query($value) : (string)$value));
+			}
+			if ($query) {
+				$query = '?' . str_replace('&', '&amp;', trim($query, '&'));
+			}
+		}
 
-			$query = '';
+		$condition = $this->config->get('config_seo_pro') ? ($url !== null) : $url;
 
-			if ($data) {
-				foreach ($data as $key => $value) {
-					$query .= '&' . rawurlencode((string)$key) . '=' . rawurlencode((is_array($value) ? http_build_query($value) : (string)$value));
-				}
-
-				if ($query) {
-					$query = '?' . str_replace('&', '&amp;', trim($query, '&'));
+		if ($condition) {
+			if ($this->config->get('config_seo_pro')) {
+				if ($this->config->get('config_page_postfix') && $postfix) {
+					$url .= $this->config->get('config_page_postfix');
+				} elseif ($this->config->get('config_seopro_addslash') || !empty($query)) {
+					$url .= '/';
 				}
 			}
 
-			return $url_info['scheme'] . '://' . $url_info['host'] . (isset($url_info['port']) ? ':' . $url_info['port'] : '') . str_replace('/index.php', '', $url_info['path']) . $url . $query;
+			return $url_info['scheme'] . '://' . $url_info['host'] . (isset($url_info['port']) ? ':' . $url_info['port'] : '') . str_replace('/index.php', '', $url_info['path']) . $city . $url . $query;
 		} else {
 			return $link;
+		}
+	}
+
+	private function redirect301($parts, $city = '')
+	{
+		$boRedirect = false;
+		$this->load->model('extension/seo/301redirect');
+
+		foreach ($parts as $key => $part) {
+			$redirect_info = $this->model_extension_seo_301redirect->getRedirectByOrigin($part);
+			if ($redirect_info) {
+				$boRedirect = true;
+				$parts[$key] = $redirect_info['url_to'];
+			}
+		}
+
+		if ($boRedirect) {
+			if ($city && (!isset($parts[0]) || $parts[0] !== $city)) {
+				array_unshift($parts, $city);
+			}
+
+			$link = $this->config->get('config_ssl') ?: $this->config->get('config_url');
+			$url_info = parse_url($link);
+			$port = isset($url_info['port']) ? ':' . $url_info['port'] : '';
+			$path = implode('/', $parts);
+			$url = $url_info['scheme'] . '://' . $url_info['host'] . $port . '/' . $path;
 		}
 	}
 }
