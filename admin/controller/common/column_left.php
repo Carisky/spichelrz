@@ -260,14 +260,6 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
-			if ($this->user->hasPermission('access', 'design/seo_url')) {
-				$design[] = array(
-					'name'	   => $this->language->get('text_seo_url'),
-					'href'     => $this->url->link('design/seo_url', 'user_token=' . $this->session->data['user_token'], true),
-					'children' => array()
-				);
-			}
-
 			if ($design) {
 				$data['menus'][] = array(
 					'id'       => 'menu-design',
@@ -278,7 +270,35 @@ class ControllerCommonColumnLeft extends Controller {
 				);
 			}
 
+                        // SEO
+                        $seo = array();
+
+                        if ($this->user->hasPermission('access', 'design/seo_url')) {
+                                $seo[] = array(
+                                        'name'     => $this->language->get('text_seo_url'),
+                                        'href'     => $this->url->link('design/seo_url', 'user_token=' . $this->session->data['user_token'], true),
+                                        'children' => array()
+                                );
+                        }
+
+                       $seo[] = array(
+                               'name'     => $this->language->get('text_city'),
+                               'href'     => $this->url->link('seo/city', 'user_token=' . $this->session->data['user_token'], true),
+                               'children' => array()
+                       );
+
+                        if ($seo) {
+                                $data['menus'][] = array(
+                                        'id'       => 'menu-seo',
+                                        'icon'     => 'fa-search',
+                                        'name'     => $this->language->get('text_seo'),
+                                        'href'     => '',
+                                        'children' => $seo
+                                );
+                        }
+
 			// Sales
+
 			$sale = array();
 
 			if ($this->user->hasPermission('access', 'sale/order')) {
