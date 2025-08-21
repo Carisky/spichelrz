@@ -107,6 +107,7 @@ $_['text_voucher_theme'] = 'Motyw';
 $_['text_weight_class'] = 'Jednostki wagi';
 $_['text_length_class'] = 'Jednostki';
 $_['text_zone'] = 'Regiony';
+$_['text_city'] = 'Miasta';
 $_['text_recurring'] = 'Płatności cykliczne';
 $_['text_order_recurring'] = 'Zamówienia cykliczne';
 $_['text_openbay_extension'] = 'OpenBay Pro';
