@@ -73,6 +73,7 @@ $_['text_voucher_theme']        = 'Voucher Themes';
 $_['text_weight_class']         = 'Weight Classes';
 $_['text_length_class']         = 'Length Classes';
 $_['text_zone']                 = 'Zones';
+$_['text_city']                 = 'Cities';
 $_['text_recurring']            = 'Recurring Profiles';
 $_['text_order_recurring']      = 'Recurring Orders';
 $_['text_complete_status']      = 'Orders Completed';
