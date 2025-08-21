@@ -291,6 +291,10 @@ class ControllerLocalisationCity extends Controller {
         $data['filter_name'] = $filter_name;
         $data['sort'] = $sort;
         $data['order'] = $order;
+        $data['header'] = $this->load->controller('common/header');
+        $data['column_left'] = $this->load->controller('common/column_left');
+        $data['footer'] = $this->load->controller('common/footer');
+
 
         $this->response->setOutput($this->load->view('localisation/city_list', $data));
     }
@@ -389,6 +393,10 @@ class ControllerLocalisationCity extends Controller {
         }
 
         $data['user_token'] = $this->session->data['user_token'];
+        $data['header'] = $this->load->controller('common/header');
+        $data['column_left'] = $this->load->controller('common/column_left');
+        $data['footer'] = $this->load->controller('common/footer');
+
 
         $this->response->setOutput($this->load->view('localisation/city_form', $data));
     }
