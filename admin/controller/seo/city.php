@@ -375,9 +375,10 @@ class ControllerSeoCity extends Controller {
     }
 
     protected function validateForm() {
-        if ($this->user->getGroupId() != 1 && !$this->user->hasPermission('modify', 'seo/city')) {
-            $this->error['warning'] = $this->language->get('error_permission');
-        }
+       if (!$this->user->hasPermission('modify', 'seo/city')) {
+           $this->error['warning'] = $this->language->get('error_permission');
+       }
+
 
         if ((utf8_strlen($this->request->post['name']) < 1) || (utf8_strlen($this->request->post['name']) > 64)) {
             $this->error['name'] = $this->language->get('error_name');
@@ -387,9 +388,10 @@ class ControllerSeoCity extends Controller {
     }
 
     protected function validateDelete() {
-        if ($this->user->getGroupId() != 1 && !$this->user->hasPermission('modify', 'seo/city')) {
-            $this->error['warning'] = $this->language->get('error_permission');
-        }
+       if (!$this->user->hasPermission('modify', 'seo/city')) {
+           $this->error['warning'] = $this->language->get('error_permission');
+       }
+
 
         return !$this->error;
     }
