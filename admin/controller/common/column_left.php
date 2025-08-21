@@ -273,12 +273,13 @@ class ControllerCommonColumnLeft extends Controller {
                         // SEO
                         $seo = array();
 
-                        if ($this->user->hasPermission('access', 'design/seo_url')) {
+
                                 $seo[] = array(
                                         'name'     => $this->language->get('text_seo_url'),
                                         'href'     => $this->url->link('design/seo_url', 'user_token=' . $this->session->data['user_token'], true),
                                         'children' => array()
                                 );
+
                         }
 
                        $seo[] = array(
@@ -286,6 +287,7 @@ class ControllerCommonColumnLeft extends Controller {
                                'href'     => $this->url->link('seo/city', 'user_token=' . $this->session->data['user_token'], true),
                                'children' => array()
                        );
+
 
                         if ($seo) {
                                 $data['menus'][] = array(

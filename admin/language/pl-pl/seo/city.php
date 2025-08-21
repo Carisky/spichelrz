@@ -24,4 +24,5 @@ $_['entry_keyword']   = 'Słowo kluczowe';
 $_['entry_status']    = 'Status';
 
 // Error
+$_['error_permission'] = 'Uwaga: nie masz uprawnień do modyfikowania miast!';
 $_['error_name']       = 'Nazwa miasta musi mieć od 1 do 64 znaków!';

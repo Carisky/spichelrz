@@ -381,4 +381,13 @@ class ControllerSeoCity extends Controller {
 
         return !$this->error;
     }
+
+    protected function validateDelete() {
+       if (!$this->user->hasPermission('modify', 'seo/city')) {
+           $this->error['warning'] = $this->language->get('error_permission');
+       }
+
+
+        return !$this->error;
+    }
 }

@@ -23,5 +23,5 @@ $_['entry_name']      = 'City Name';
 $_['entry_keyword']   = 'Keyword';
 $_['entry_status']    = 'Status';
 
-// Error
+$_['error_permission'] = 'Warning: You do not have permission to modify cities!';
 $_['error_name']       = 'City Name must be between 1 and 64 characters!';
