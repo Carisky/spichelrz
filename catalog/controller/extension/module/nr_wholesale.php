@@ -1,13 +1,44 @@
 <?php
 class ControllerExtensionModuleNrWholesale extends Controller
 {
+
+    /** @var Log */
+    protected $logger;
+
+    public function __construct($registry)
+    {
+        parent::__construct($registry);
+        // создаём логгер, файл будет в system/storage/logs/wholesale.log
+        $this->logger = new Log('wholesale.log');
+    }
+
+    /** Универсальный метод логирования */
+    protected function log($message, $context = [])
+    {
+        $time = date("Y-m-d H:i:s");
+        $logMessage = "[$time] $message";
+        if (!empty($context)) {
+            $logMessage .= ' | ' . json_encode($context, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        }
+        $this->logger->write($logMessage);
+    }
+
     public function index()
     {
+
+        $this->log("Загрузка wholesale index", [
+            'customer_id' => $this->customer->getId(),
+            'group_id'    => $this->customer->getGroupId(),
+        ]);
+
+
         $this->load->language('checkout/buy');
 
         if ($this->customer->getGroupId() != 2) {
+            $this->log("Редирект: не wholesale клиент");
             $data['redirect'] = $this->url->link('common/home', '', true);
         } else {
+            $this->log("Инициализация wholesale для клиента", ['id' => $this->customer->getId()]);
             $this->load->model('catalog/category');
             $this->load->model('catalog/product');
             $this->load->model('tool/image');
@@ -212,6 +243,9 @@ class ControllerExtensionModuleNrWholesale extends Controller
 
     public function change_shipping()
     {
+        $this->log("Смена способа доставки", [
+            'method' => $this->request->post['shipping_method']
+        ]);
         $shipping_code = $this->request->post['shipping_method'];
         $shipping_methods = $this->updateShippingMethods();
         foreach ($shipping_methods as $method) {
@@ -265,118 +299,180 @@ class ControllerExtensionModuleNrWholesale extends Controller
 
     public function calculate($json = true)
     {
+        $this->log("Расчёт итогов START", [
+            'json' => $json,
+            'posted_products_count' => isset($this->request->post['product']) ? count($this->request->post['product']) : null
+        ]);
+
+        // 1) Обновляем корзину/адрес из POST при ajax-вызове
         if ($json) {
-            // Если данные переданы, используем их, иначе берем из сессии
-            $cart_products = isset($this->request->post['product'])
-                ? $this->request->post['product']
-                : (isset($this->session->data['wholesale_products']) ? $this->session->data['wholesale_products'] : []);
-            $this->session->data['wholesale_products'] = $cart_products;
+            $posted = isset($this->request->post['product']) ? $this->request->post['product'] : [];
+            $cart   = isset($this->session->data['wholesale_products']) ? $this->session->data['wholesale_products'] : [];
+
+            foreach ($posted as $pid => $row) {
+                $cart[$pid] = array_merge(isset($cart[$pid]) ? $cart[$pid] : [], $row);
+            }
+            $this->session->data['wholesale_products'] = $cart;
 
             $address = isset($this->request->post['address'])
                 ? $this->request->post['address']
                 : (isset($this->session->data['wholesale_address']) ? $this->session->data['wholesale_address'] : []);
             $this->session->data['wholesale_address'] = $address;
-        } else {
-            $cart_products = isset($this->session->data['wholesale_products']) ? $this->session->data['wholesale_products'] : [];
         }
 
-        if (empty($cart_products)) {
-            $amount = $this->currency->format(0, $this->session->data['currency']);
-            $data = [
-                'subtotal' => $amount,
-                'discount' => $amount,
-                'total'    => $amount
-            ];
+        $cart_products = isset($this->session->data['wholesale_products']) ? $this->session->data['wholesale_products'] : [];
 
-            if ($json) {
-                $this->sendJSON($data);
-            }
+        if (empty($cart_products)) {
+            $zero = $this->currency->format(0, $this->session->data['currency']);
+            $data = [
+                'items'          => 0,
+                'subtotal'       => $zero,
+                'discount_pct'   => 0,
+                'discount_value' => $zero,
+                'shipping'       => $zero,
+                'tax'            => $zero,
+                'total'          => $zero
+            ];
+            $this->log("Расчёт итогов EMPTY CART", $data);
+            if ($json) $this->sendJSON($data);
             return $data;
         }
 
         $this->load->model('catalog/product');
-        $primary_discount = $this->config->get('module_nr_wholesale_discount');
-        $amount = 0;
-        $amounttax = 0;
-        
-        foreach ($cart_products as &$product) {
-            if (!$product['quantity']) continue;
-            
-            $product_info = $this->model_catalog_product->getProduct($product['product_id']); //print_r($product_info);
-            $price = round($product['price'] - ($product['price'] / 100 * $primary_discount), 2);
-            $vat = round(($product_info['tax_class_id'] ? $this->tax->getTax($price, $product_info['tax_class_id']) : 0), 2);
-            $amount += round(($price + $vat) * $product['quantity'], 2);
-            $amounttax += round($vat * $product['quantity'], 2);
+
+        $primary_discount = (float)$this->config->get('module_nr_wholesale_discount');
+
+        $amount_gross_before_tier = 0.0; // брутто после primary, ДО лестницы
+        $amount_tax_before_tier   = 0.0;
+
+        $count_items = 0;
+
+        // 2) Счёт после primary-скидки
+        foreach ($cart_products as $p) {
+            $qty = isset($p['quantity']) ? (int)$p['quantity'] : 0;
+            if ($qty <= 0) continue;
+
+            $info = $this->model_catalog_product->getProduct((int)$p['product_id']);
+            if (!$info) continue;
+
+            $base      = (float)$info['price'];
+            $price_net = round($base * (1 - $primary_discount / 100), 2);
+
+            $vat_unit = $info['tax_class_id']
+                ? round($this->tax->getTax($price_net, $info['tax_class_id']), 2)
+                : 0.0;
+
+            $amount_gross_before_tier += round(($price_net + $vat_unit) * $qty, 2);
+            $amount_tax_before_tier   += round($vat_unit * $qty, 2);
+            $count_items              += $qty;
         }
 
-        $subtotal = round($amount, 2); //$subtotal = round($amount - ($amount / 100 * $primary_discount), 2);
+        $subtotal_gross = round($amount_gross_before_tier, 2); // брутто до лестницы
 
-        if ($subtotal >= $this->config->get('module_nr_wholesale_sum3')) {
-            $discount = $this->config->get('module_nr_wholesale_discount3');
-        } elseif ($subtotal >= $this->config->get('module_nr_wholesale_sum2')) {
-            $discount = $this->config->get('module_nr_wholesale_discount2');
-        } elseif ($subtotal >= $this->config->get('module_nr_wholesale_sum1')) {
-            $discount = $this->config->get('module_nr_wholesale_discount1');
+        // 3) Определяем лестничную скидку по сумме брутто
+        if ($subtotal_gross >= (float)$this->config->get('module_nr_wholesale_sum3')) {
+            $discount2 = (float)$this->config->get('module_nr_wholesale_discount3');
+        } elseif ($subtotal_gross >= (float)$this->config->get('module_nr_wholesale_sum2')) {
+            $discount2 = (float)$this->config->get('module_nr_wholesale_discount2');
+        } elseif ($subtotal_gross >= (float)$this->config->get('module_nr_wholesale_sum1')) {
+            $discount2 = (float)$this->config->get('module_nr_wholesale_discount1');
         } else {
-            $discount = 0;
+            $discount2 = 0.0;
         }
 
-        if ($discount > 0) {
-            $amount = 0;
-            $amounttax = 0;
-            foreach ($cart_products as &$product) {
-                if (!$product['quantity']) continue;
-                $product_info = $this->model_catalog_product->getProduct($product['product_id']); //print_r($product_info);
-                $price = round($product['price'] - ($product['price'] / 100 * $primary_discount), 2);
-                $price = round($price - ($price / 100 * $discount), 2);
-                $vat = round(($product_info['tax_class_id'] ? $this->tax->getTax($price, $product_info['tax_class_id']) : 0), 2);
-                $amount += round(($price + $vat) * $product['quantity'], 2);
-                $amounttax += round($vat * $product['quantity'], 2);
+        // 4) Пересчёт с учётом лестницы (если есть)
+        $amount_gross_after_tier = $subtotal_gross;
+        $amount_tax_after_tier   = $amount_tax_before_tier;
+
+        if ($discount2 > 0) {
+            $amount_gross_after_tier = 0.0;
+            $amount_tax_after_tier   = 0.0;
+
+            foreach ($cart_products as $p) {
+                $qty = isset($p['quantity']) ? (int)$p['quantity'] : 0;
+                if ($qty <= 0) continue;
+
+                $info = $this->model_catalog_product->getProduct((int)$p['product_id']);
+                if (!$info) continue;
+
+                $base      = (float)$info['price'];
+                $price_net = round($base * (1 - $primary_discount / 100), 2);
+                $price_net = round($price_net * (1 - $discount2 / 100), 2);
+
+                $vat_unit = $info['tax_class_id']
+                    ? round($this->tax->getTax($price_net, $info['tax_class_id']), 2)
+                    : 0.0;
+
+                $amount_gross_after_tier += round(($price_net + $vat_unit) * $qty, 2);
+                $amount_tax_after_tier   += round($vat_unit * $qty, 2);
             }
-            //$amounttax = round($amounttax - ($amounttax / 100 * $discount), 2);
-            $total = round($amount, 2);
-            //$total = round($subtotal - ($subtotal / 100 * $discount), 2);
-            //$discount = $total - $subtotal;
-        } else {
-            $total = $subtotal;
         }
 
-        $shipping = isset($this->session->data['shipping_method']['cost']) ? $this->session->data['shipping_method']['cost'] : 30;
-        if ($total > 1500) {
-            $shipping = 0;
+        $discount_value = round($subtotal_gross - $amount_gross_after_tier, 2);
+
+        // 5) Доставка
+        $shipping = isset($this->session->data['shipping_method']['cost'])
+            ? (float)$this->session->data['shipping_method']['cost']
+            : 30.0;
+
+        $total_gross = round($amount_gross_after_tier, 2);
+
+        if ($total_gross > 1500) {
+            $shipping = 0.0;
         } else {
-            //$shipping = isset($this->session->data['shipping_method']['cost']) ? $this->session->data['shipping_method']['cost'] : 0;
-            $total += $shipping;
+            $total_gross += $shipping;
         }
 
-        // if ($total > 1500) $shipping = 0;
-        // else $total += $shipping;
-
+        // 6) Ответ
         $data = [
-            'subtotal' => $this->currency->format($subtotal, $this->session->data['currency']),
-            'discount' => $discount . " %",
-            'price'    => $price + $vat,
-            'shipping' => $this->currency->format($shipping, $this->session->data['currency']),
-            'tax'      => $this->currency->format($amounttax, $this->session->data['currency']),
-            'total'    => $this->currency->format($total, $this->session->data['currency'])
+            'items'            => $count_items,
+            'subtotal'         => $this->currency->format($subtotal_gross, $this->session->data['currency']),
+            'discount'         => $discount2 . ' %', // <<< вернуть старое поле (только процент)
+            'discount_pct'     => $discount2,        // оставить и числовое поле
+            'discount_value'   => $this->currency->format($discount_value, $this->session->data['currency']),
+            'shipping'         => $this->currency->format($shipping, $this->session->data['currency']),
+            'tax'              => $this->currency->format($amount_tax_after_tier, $this->session->data['currency']),
+            'total'            => $this->currency->format($total_gross, $this->session->data['currency']),
+            'raw' => [
+                'subtotal'       => $subtotal_gross,
+                'discount_value' => $discount_value,
+                'discount_pct'   => $discount2,
+                'shipping'       => $shipping,
+                'tax'            => $amount_tax_after_tier,
+                'total'          => $total_gross,
+            ],
         ];
-        if ($json) {
-            $this->sendJSON($data);
-        }
+
+
+        $this->log("Расчёт итогов DONE", [
+            'items'              => $count_items,
+            'subtotal_gross'     => $subtotal_gross,
+            'discount2_pct'      => $discount2,
+            'discount_value'     => $discount_value,
+            'tax_sum'            => $amount_tax_after_tier,
+            'shipping'           => $shipping,
+            'total_gross'        => $total_gross
+        ]);
+
+        if ($json) $this->sendJSON($data);
         return $data;
     }
 
+
+
     public function order()
     {
-        // Запоминаем данные формы
-        $address = $this->request->post['address'];
+        $this->log("Создание заказа", [
+            'address'  => $this->request->post['address'],
+            'products' => $this->request->post['product'],
+        ]);
+
+        $address  = $this->request->post['address'];
         $products = $this->request->post['product'];
 
-        // обновляем адрес доставки в сессии, чтобы методы оплаты/доставки
-        // рассчитывались исходя из актуальных данных
+        // Актуализируем методы доставки/оплаты из POST (если переданы)
         $this->session->data['shipping_address'] = $address;
 
-        // Сохраняем выбранный метод доставки, если он передан
         if (isset($this->request->post['shipping_method'])) {
             $shipping_methods = $this->updateShippingMethods();
             foreach ($shipping_methods as $method) {
@@ -391,7 +487,6 @@ class ControllerExtensionModuleNrWholesale extends Controller
             }
         }
 
-        // Сохраняем выбранный метод оплаты, если он передан
         if (isset($this->request->post['payment_method'])) {
             $payment_methods = $this->updatePaymentMethods();
             if (isset($payment_methods[$this->request->post['payment_method']])) {
@@ -399,15 +494,11 @@ class ControllerExtensionModuleNrWholesale extends Controller
             }
         }
 
-        // 1) Собираем все ошибки
+        // Валидация
         $error = $this->validateAddress($address, $products);
-        if (!$error) {
-            // проверка на количество
-            if (empty($products) || !array_filter($products, fn($p)=>!empty($p['quantity']))) {
-                $error['general'] = $this->language->get('error_empty_products');
-            }
+        if (!$error && (empty($products) || !array_filter($products, fn($p) => !empty($p['quantity'])))) {
+            $error['general'] = $this->language->get('error_empty_products');
         }
-
         if ($error) {
             $this->response->addHeader($this->request->server['SERVER_PROTOCOL'] . ' 400 Bad Request');
             $this->response->addHeader('Content-Type: application/json');
@@ -417,46 +508,38 @@ class ControllerExtensionModuleNrWholesale extends Controller
 
         $this->session->data['wholesale_address'] = $address;
 
-        // Проверяем корректность заполненных данных
-        $error = $this->validateAddress($address, $products);
-        if ($error) {
-            $this->sendJSON(['error' => $error]);
-        }
-
+        // Сервисные загрузки
         $this->load->language('checkout/buy');
         $this->load->model('localisation/country');
         $this->load->model('checkout/order');
         $this->load->model('catalog/product');
+        $this->load->model('account/customer');
 
-        // Данные заказа
+        // Базовые данные заказа
         $order_data = [];
         $order_data['invoice_prefix'] = $this->config->get('config_invoice_prefix');
-        $order_data['store_id'] = $this->config->get('config_store_id');
-        $order_data['store_name'] = $this->config->get('config_name');
+        $order_data['store_id']       = $this->config->get('config_store_id');
+        $order_data['store_name']     = $this->config->get('config_name');
+        $order_data['store_url']      = $order_data['store_id'] ? $this->config->get('config_url') : (($this->request->server['HTTPS']) ? HTTPS_SERVER : HTTP_SERVER);
 
-        if ($order_data['store_id']) {
-            $order_data['store_url'] = $this->config->get('config_url');
-        } else {
-            $order_data['store_url'] = ($this->request->server['HTTPS']) ? HTTPS_SERVER : HTTP_SERVER;
-        }
+        $order_data['customer_id']        = $this->customer->getId();
+        $order_data['customer_group_id']  = $this->customer->getGroupId();
+        $order_data['firstname']          = $address['firstname'];
+        $order_data['lastname']           = $address['lastname'];
+        $order_data['email']              = $address['email'];
+        $order_data['telephone']          = $address['telephone'];
+        $order_data['comment']            = $address['comment'];
 
-        $order_data['customer_id'] = $this->customer->getId();
-        $order_data['customer_group_id'] = $this->customer->getGroupId();
-        $order_data['firstname'] = $address['firstname'];
-        $order_data['lastname'] = $address['lastname'];
-        $order_data['email'] = $address['email'];
-        $order_data['telephone'] = $address['telephone'];
-        $order_data['comment'] = $address['comment'];
-
-        // Получаем custom_field из аккаунта покупателя
-        $this->load->model('account/customer');
-        $customer_info = $this->model_account_customer->getCustomer($this->customer->getId());
+        // custom_field: частично перезапишем значениями из адреса
+        $customer_info            = $this->model_account_customer->getCustomer($this->customer->getId());
         $order_data['custom_field'] = json_decode($customer_info['custom_field'], true);
         $order_data['custom_field'][1] = $address['company'];
         $order_data['custom_field'][3] = $address['nip'];
         $order_data['custom_field'][6] = $address['city'];
         $order_data['custom_field'][7] = $address['postcode'];
         $order_data['custom_field'][4] = $address['address_1'];
+
+        // Обновим профиль клиента
         $client_info = $address;
         $client_info['custom_field']['account'][1] = $address['company'];
         $client_info['custom_field']['account'][3] = $address['nip'];
@@ -464,138 +547,123 @@ class ControllerExtensionModuleNrWholesale extends Controller
         $client_info['custom_field']['account'][6] = $address['city'];
         $client_info['custom_field']['account'][7] = $address['postcode'];
         $this->model_account_customer->editCustomer($this->customer->getId(),  $client_info);
-        $order_data['payment_company'] = $order_data['custom_field'][1];
-        $order_data['payment_firstname'] = $order_data['firstname'];
-        $order_data['payment_lastname'] = $order_data['lastname'];
-        $order_data['payment_address_1'] = $address['address_1'];
-        $order_data['payment_address_2'] = '';
-        $order_data['payment_city'] = $order_data['custom_field'][6];
-        $order_data['payment_postcode'] = $order_data['custom_field'][7];
-        $order_data['payment_zone'] = '';
-        $order_data['payment_zone_id'] = 0;
-        $order_data['payment_country'] = '';
-        $order_data['payment_country_id'] = $this->config->get('config_country_id');
+
+        // Платёжные/доставочные поля
+        $order_data['payment_company']       = $order_data['custom_field'][1];
+        $order_data['payment_firstname']     = $order_data['firstname'];
+        $order_data['payment_lastname']      = $order_data['lastname'];
+        $order_data['payment_address_1']     = $address['address_1'];
+        $order_data['payment_address_2']     = '';
+        $order_data['payment_city']          = $order_data['custom_field'][6];
+        $order_data['payment_postcode']      = $order_data['custom_field'][7];
+        $order_data['payment_zone']          = '';
+        $order_data['payment_zone_id']       = 0;
+        $order_data['payment_country']       = '';
+        $order_data['payment_country_id']    = $this->config->get('config_country_id');
         $order_data['payment_address_format'] = '';
-        $order_data['payment_custom_field'] = $order_data['custom_field'];
+        $order_data['payment_custom_field']  = $order_data['custom_field'];
 
-        // Дублируем в shipping_* те же данные
-        $order_data['shipping_firstname'] = $order_data['payment_firstname'];
-        $order_data['shipping_lastname'] = $order_data['payment_lastname'];
-        $order_data['shipping_company'] = $order_data['payment_company'];
-        $order_data['shipping_address_1'] = $order_data['payment_address_1'];
-        $order_data['shipping_address_2'] = $order_data['payment_address_2'];
-        $order_data['shipping_city'] = $order_data['payment_city'];
-        $order_data['shipping_postcode'] = $order_data['payment_postcode'];
-        $order_data['shipping_zone'] = $order_data['payment_zone'];
-        $order_data['shipping_zone_id'] = $order_data['payment_zone_id'];
-        $order_data['shipping_country'] = $order_data['payment_country'];
-        $order_data['shipping_country_id'] = $order_data['payment_country_id'];
+        $order_data['shipping_firstname']     = $order_data['payment_firstname'];
+        $order_data['shipping_lastname']      = $order_data['payment_lastname'];
+        $order_data['shipping_company']       = $order_data['payment_company'];
+        $order_data['shipping_address_1']     = $order_data['payment_address_1'];
+        $order_data['shipping_address_2']     = $order_data['payment_address_2'];
+        $order_data['shipping_city']          = $order_data['payment_city'];
+        $order_data['shipping_postcode']      = $order_data['payment_postcode'];
+        $order_data['shipping_zone']          = $order_data['payment_zone'];
+        $order_data['shipping_zone_id']       = $order_data['payment_zone_id'];
+        $order_data['shipping_country']       = $order_data['payment_country'];
+        $order_data['shipping_country_id']    = $order_data['payment_country_id'];
         $order_data['shipping_address_format'] = $order_data['payment_address_format'];
-        $order_data['shipping_custom_field'] = $order_data['payment_custom_field'];
+        $order_data['shipping_custom_field']  = $order_data['payment_custom_field'];
 
-        // Метод оплаты
-        if (isset($this->session->data['payment_method']['title'])) {
-            $order_data['payment_method'] = $this->session->data['payment_method']['title'];
-        } else {
-            $order_data['payment_method'] = '';
-        }
-        if (isset($this->session->data['payment_method']['code'])) {
-            $order_data['payment_code'] = $this->session->data['payment_method']['code'];
-        } else {
-            $order_data['payment_code'] = '';
-        }
+        $order_data['payment_method'] = $this->session->data['payment_method']['title'] ?? '';
+        $order_data['payment_code']   = $this->session->data['payment_method']['code']  ?? '';
 
-        // Считаем товары
-        $primary_discount = $this->config->get('module_nr_wholesale_discount');
-        $amount = 0;
-        $amounttax = 0;
+        // 1) Формируем товары: цена после primary, налог per-item, сохраняем tax_class_id
+        $primary_discount = (float)$this->config->get('module_nr_wholesale_discount');
+
+        $amount    = 0.0; // брутто после primary, до лестницы
+        $amounttax = 0.0;
+
         $order_data['products'] = [];
 
         foreach ($products as $product) {
-            if (!$product['quantity']) continue;
-            $product_info = $this->model_catalog_product->getProduct($product['product_id']);
+            $q = (int)($product['quantity'] ?? 0);
+            if ($q <= 0) continue;
 
-            $price = round($product_info['price'] - ($product_info['price'] / 100 * $primary_discount), 2);
-            $tax = round($this->tax->getTax($price, $product_info['tax_class_id']), 2);
+            $product_info = $this->model_catalog_product->getProduct((int)$product['product_id']);
+            if (!$product_info) continue;
 
-            $amount += round(($price + $tax) * $product['quantity'], 2);
-            $amounttax += round($tax * $product['quantity'], 2);
+            $base          = (float)$product_info['price'];
+            $price_net     = round($base * (1 - $primary_discount / 100), 2);
+            $tax_class_id  = (int)$product_info['tax_class_id'];
+            $vat_unit      = $tax_class_id ? round($this->tax->getTax($price_net, $tax_class_id), 2) : 0.0;
+
+            $amount    += round(($price_net + $vat_unit) * $q, 2);
+            $amounttax += round($vat_unit * $q, 2);
 
             $order_data['products'][] = [
-                'product_id' => $product['product_id'],
-                'name'       => $product_info['name'],
-                'model'      => $product_info['model'],
-                'option'     => [],
-                'download'   => [],
-                'quantity'   => $product['quantity'],
-                'subtract'   => $product_info['subtract'],
-                'price'      => $price,
-                'total'      => $price * $product['quantity'],
-                'tax'        => $tax,
-                'reward'     => 0,
-                'image'      => ($product_info['image'] ? $product_info['image'] : ''),
-                'sku'        => $product_info['sku'],
-                'weight'     => $product_info['weight'],
+                'product_id'   => (int)$product['product_id'],
+                'name'         => $product_info['name'],
+                'model'        => $product_info['model'],
+                'option'       => [],
+                'download'     => [],
+                'quantity'     => $q,
+                'subtract'     => $product_info['subtract'],
+                'price'        => $price_net,                     // уже после primary
+                'total'        => round($price_net * $q, 2),
+                'tax'          => $vat_unit,
+                'tax_class_id' => $tax_class_id,                  // <<< сохраняем
+                'reward'       => 0,
+                'image'        => ($product_info['image'] ?: ''),
+                'sku'          => $product_info['sku'],
+                'weight'       => $product_info['weight'],
             ];
         }
 
-        // Изначальная сумма
-        $subtotal = round($amount, 2);
+        $subtotal = round($amount, 2); // брутто до лестницы
 
-        // Определяем скидку по сумме
-        if ($subtotal >= $this->config->get('module_nr_wholesale_sum3')) {
-            $discount = $this->config->get('module_nr_wholesale_discount3');
-        } elseif ($subtotal >= $this->config->get('module_nr_wholesale_sum2')) {
-            $discount = $this->config->get('module_nr_wholesale_discount2');
-        } elseif ($subtotal >= $this->config->get('module_nr_wholesale_sum1')) {
-            $discount = $this->config->get('module_nr_wholesale_discount1');
-        } else {
-            $discount = 0;
-        }
+        // 2) Лестничная скидка от суммы брутто до лестницы
+        if ($subtotal >= (float)$this->config->get('module_nr_wholesale_sum3')) $discount = (float)$this->config->get('module_nr_wholesale_discount3');
+        elseif ($subtotal >= (float)$this->config->get('module_nr_wholesale_sum2')) $discount = (float)$this->config->get('module_nr_wholesale_discount2');
+        elseif ($subtotal >= (float)$this->config->get('module_nr_wholesale_sum1')) $discount = (float)$this->config->get('module_nr_wholesale_discount1');
+        else   $discount = 0.0;
 
-        // Применяем скидку
+        // 3) Применяем лестницу per-item корректно
         if ($discount > 0) {
-            $amount = 0;
-            $amounttax = 0;
-            foreach ($order_data['products'] as &$p) {
-                $p['price'] = round($p['price'] - ($p['price'] / 100 * $discount), 2);
-                $p['total'] = round($p['price'] * $p['quantity'], 2);
-                $p['tax']   = round($this->tax->getTax($p['price'], $product_info['tax_class_id']), 2);
+            $amount    = 0.0;
+            $amounttax = 0.0;
 
-                $amount += round(($p['price'] + $p['tax']) * $p['quantity'], 2);
+            foreach ($order_data['products'] as &$p) {
+                $p['price'] = round($p['price'] * (1 - $discount / 100), 2);
+                $p['total'] = round($p['price'] * $p['quantity'], 2);
+                $p['tax']   = round($this->tax->getTax($p['price'], (int)$p['tax_class_id']), 2);
+
+                $amount    += round(($p['price'] + $p['tax']) * $p['quantity'], 2);
                 $amounttax += round($p['tax'] * $p['quantity'], 2);
             }
-            $total = round($amount, 2);
-        } else {
-            $total = $subtotal;
-        }
-        $totaldiscount = $subtotal - $total;
-
-        // Получаем реальные данные доставки из сессии
-        if (!empty($this->session->data['shipping_method']['cost'])) {
-            $shipping = $this->session->data['shipping_method']['cost'];
-        } else {
-            $shipping = 0;
-        }
-        if (!empty($this->session->data['shipping_method']['title'])) {
-            $order_data['shipping_method'] = $this->session->data['shipping_method']['title'];
-        } else {
-            $order_data['shipping_method'] = 'Metoda dostawy';
-        }
-        if (!empty($this->session->data['shipping_method']['code'])) {
-            $order_data['shipping_code'] = $this->session->data['shipping_method']['code'];
-        } else {
-            $order_data['shipping_code'] = '';
+            unset($p);
         }
 
-        // Если больше 1500 - доставка 0
-        if ($total > 1500) {
-            $shipping = 0;
-        } else {
-            $total += $shipping;
+        $total_after_discounts = round($amount, 2);
+        $totaldiscount_value   = round($subtotal - $total_after_discounts, 2);
+
+        // 4) Доставка
+        $shipping_cost = !empty($this->session->data['shipping_method']['cost'])
+            ? (float)$this->session->data['shipping_method']['cost']
+            : 0.0;
+
+        $order_data['shipping_method'] = $this->session->data['shipping_method']['title'] ?? 'Metoda dostawy';
+        $order_data['shipping_code']   = $this->session->data['shipping_method']['code']  ?? '';
+
+        if ($total_after_discounts > 1500) {
+            $shipping_cost = 0.0;
         }
 
-        // Формируем итоги
+        $total = $total_after_discounts + $shipping_cost;
+
+        // 5) Totals
         $order_data['totals'] = [
             [
                 'code'       => 'sub_total',
@@ -606,13 +674,13 @@ class ControllerExtensionModuleNrWholesale extends Controller
             [
                 'code'       => 'nr_wholesale',
                 'title'      => $this->language->get('text_discount') . ' ' . $discount . '%',
-                'value'      => $totaldiscount,
+                'value'      => $totaldiscount_value,
                 'sort_order' => 2
             ],
             [
                 'code'       => 'shipping',
                 'title'      => $order_data['shipping_method'],
-                'value'      => $shipping,
+                'value'      => $shipping_cost,
                 'sort_order' => 3
             ],
             [
@@ -630,48 +698,46 @@ class ControllerExtensionModuleNrWholesale extends Controller
         ];
         $order_data['total'] = $total;
 
-        // Прочие поля
-        $order_data['affiliate_id'] = 0;
-        $order_data['commission']   = 0;
-        $order_data['marketing_id'] = 0;
-        $order_data['tracking']     = '';
-        $order_data['language_id']  = $this->config->get('config_language_id');
-        $order_data['currency_id']  = $this->currency->getId($this->session->data['currency']);
-        $order_data['currency_code'] = $this->session->data['currency'];
+        // 6) Тех.поля
+        $order_data['affiliate_id']   = 0;
+        $order_data['commission']     = 0;
+        $order_data['marketing_id']   = 0;
+        $order_data['tracking']       = '';
+        $order_data['language_id']    = $this->config->get('config_language_id');
+        $order_data['currency_id']    = $this->currency->getId($this->session->data['currency']);
+        $order_data['currency_code']  = $this->session->data['currency'];
         $order_data['currency_value'] = $this->currency->getValue($this->session->data['currency']);
-        $order_data['ip'] = $this->request->server['REMOTE_ADDR'];
+        $order_data['ip']             = $this->request->server['REMOTE_ADDR'];
+        $order_data['forwarded_ip']   = !empty($this->request->server['HTTP_X_FORWARDED_FOR']) ? $this->request->server['HTTP_X_FORWARDED_FOR'] : (!empty($this->request->server['HTTP_CLIENT_IP']) ? $this->request->server['HTTP_CLIENT_IP'] : '');
+        $order_data['user_agent']      = $this->request->server['HTTP_USER_AGENT'] ?? '';
+        $order_data['accept_language'] = $this->request->server['HTTP_ACCEPT_LANGUAGE'] ?? '';
 
-        if (!empty($this->request->server['HTTP_X_FORWARDED_FOR'])) {
-            $order_data['forwarded_ip'] = $this->request->server['HTTP_X_FORWARDED_FOR'];
-        } elseif (!empty($this->request->server['HTTP_CLIENT_IP'])) {
-            $order_data['forwarded_ip'] = $this->request->server['HTTP_CLIENT_IP'];
-        } else {
-            $order_data['forwarded_ip'] = '';
-        }
-        $order_data['user_agent']      = isset($this->request->server['HTTP_USER_AGENT']) ? $this->request->server['HTTP_USER_AGENT'] : '';
-        $order_data['accept_language'] = isset($this->request->server['HTTP_ACCEPT_LANGUAGE']) ? $this->request->server['HTTP_ACCEPT_LANGUAGE'] : '';
-
-        // Создаём заказ
+        // 7) Создание заказа
         $order_id = $this->model_checkout_order->addOrder($order_data);
         $this->session->data['order_id'] = $order_id;
 
-        // Присваиваем статус заказа
-        if ($order_data['payment_code']) {
-            $status = $this->config->get('payment_' . $order_data['payment_code'] . '_order_status_id');
-        } else {
-            $status = $this->config->get('config_order_status_id');
-        }
+        // Статус
+        $status = $order_data['payment_code']
+            ? $this->config->get('payment_' . $order_data['payment_code'] . '_order_status_id')
+            : $this->config->get('config_order_status_id');
+
         $this->model_checkout_order->addOrderHistory($order_id, $status);
 
-        // Вызываем контроллер оплаты
+        // Оплата
         $payment = $this->load->controller('extension/payment/' . $this->session->data['payment_method']['code']);
 
-        // Очищаем wholesale_products
+        // Очистка wholesale-корзины
         unset($this->session->data['wholesale_products']);
 
-        // Возвращаем ответ
+        $this->log("Заказ создан", [
+            'order_id' => $order_id,
+            'total'    => $order_data['total'],
+            'customer' => $this->customer->getId()
+        ]);
+
         $this->sendJSON(['order_id' => $order_id, 'payment' => $payment]);
     }
+
 
     protected function sendJSON($data)
     {
@@ -696,7 +762,7 @@ class ControllerExtensionModuleNrWholesale extends Controller
             $error['lastname'] = $this->language->get('error_lastname');
         if ((utf8_strlen(trim($address['company'])) < 1) || (utf8_strlen(trim($address['company'])) > 255))
             $error['company'] = $this->language->get('error_company');
-        if ((utf8_strlen(trim($address['nip'])) < 1) || (utf8_strlen(trim($address['nip'])) > 10)|| !preg_match('/^[0-9]+$/',trim($address['nip'])))
+        if ((utf8_strlen(trim($address['nip'])) < 1) || (utf8_strlen(trim($address['nip'])) > 10) || !preg_match('/^[0-9]+$/', trim($address['nip'])))
             $error['nip'] = $this->language->get('error_nip');
         if ((utf8_strlen(trim($address['city'])) < 1) || (utf8_strlen(trim($address['city'])) > 70))
             $error['city'] = $this->language->get('error_city');

@@ -341,7 +341,8 @@
 											url: 'index.php?route=extension/module/nr_wholesale/calculate',
 											type: 'post',
 											dataType: 'json',
-											data: $('#wholesale').serialize(),
+											data: $('#wholesale [name^="address["]').serialize() + '&' +
+        									p.find(':input[name^="product["]').serialize(),
 											success: function(json) {
 												//$('#loader').remove();
 												$('[data-totals-subtotal]').html(json.subtotal);
@@ -356,55 +357,57 @@
 											}
 										});
 									}
-									function confirm() {
-										$('#wholesale-confirm').prop('disabled', true);
-										$('[data-error]').removeClass('input-error').find('.form-error').text('').hide();
-										$('body').append(loader);
-										$.ajax({
-											url: 'index.php?route=extension/module/nr_wholesale/order',
-											type: 'post',
-											dataType: 'json',
-											data: $('#wholesale').serialize(),
-											success: function(json) {
-											$('#loader').remove();
-												// if(json.error) {
-												// 	$.each(json.error, function(i, v){
-												// 		$('[data-error="'+i+'"]').addClass('input-error').find('.form-error').text(v).show();
-												// 	});
-												// } else if(json.order_id) {
-												// 	window.location.href = '/konto';
-												// 	//nrShowMessage(success, 1);
-												// }
-												
-												// checkJson(json);
-												if(json.error) {
-													$.each(json.error, function(i, v){
-														$('[data-error="'+i+'"]').addClass('input-error').find('.form-error').text(v).show();
-													});
-													renderErrors(json.error);
-													$('#wholesale-confirm').prop('disabled', false);
-													$('html, body').animate({ scrollTop: $('#wholesale').offset().top }, 'slow');
-												} else if(json.payment) {
-													try { $('#payment').html(json.payment).find('#button-confirm').click(); } catch (e) {}
-													try { $('#payment').html(json.payment).find('.js-bluepayment-confirm').click(); } catch (e) {}
-													// try {
-													//  	if ($('#payment').html(json.payment).find('.js-bluepayment-confirm').length>0) {
-													// 		window.location.href = 'index.php?route=extension/payment/bluepayment/processCheckout';
-													//  	}
-													// } catch (e) {}
-												} else {
-													console.log(json);
-												}
-						
-											},
-											error: function(data) {
-												$('#loader').remove();
-												renderErrors(data.responseJSON.error);
-												$('#wholesale-confirm').prop('disabled', false);
-												console.log(data.responseText);
-											}
-										});
-									}
+function confirm() {
+  $('#wholesale-confirm').prop('disabled', true);
+  $('[data-error]').removeClass('input-error').find('.form-error').text('').hide();
+  $('body').append(loader);
+
+  // 1) Адрес + выбранные методы
+  var payload = $('#wholesale [name^="address["]').serialize();
+  var $pay = $('[data-payment] input:checked');
+  var $ship = $('[data-shipping-methods] input:checked');
+  if ($pay.length)  payload += '&payment_method=' + encodeURIComponent($pay.val());
+  if ($ship.length) payload += '&shipping_method=' + encodeURIComponent($ship.val());
+
+  // 2) ТОЛЬКО активные товары (qty > 0)
+  $('#wholesale .product-row').each(function () {
+    var $row = $(this);
+    var qty = parseInt($row.find('[name$="[quantity]"]').val(), 10) || 0;
+    if (qty > 0) {
+      payload += '&' + $row.find(':input[name^="product["]').serialize();
+    }
+  });
+
+  $.ajax({
+    url: 'index.php?route=extension/module/nr_wholesale/order',
+    type: 'post',
+    dataType: 'json',
+    data: payload,
+    success: function (json) {
+      $('#loader').remove();
+      if (json.error) {
+        $.each(json.error, function(i, v){
+          $('[data-error="'+i+'"]').addClass('input-error').find('.form-error').text(v).show();
+        });
+        renderErrors(json.error);
+        $('#wholesale-confirm').prop('disabled', false);
+        $('html, body').animate({ scrollTop: $('#wholesale').offset().top }, 'slow');
+      } else if (json.payment) {
+        try { $('#payment').html(json.payment).find('#button-confirm').click(); } catch (e) {}
+        try { $('#payment').html(json.payment).find('.js-bluepayment-confirm').click(); } catch (e) {}
+      } else {
+        console.log(json);
+      }
+    },
+    error: function (data) {
+      $('#loader').remove();
+      try { renderErrors(data.responseJSON.error); } catch(e) {}
+      $('#wholesale-confirm').prop('disabled', false);
+      console.log(data.responseText);
+    }
+  });
+}
+
 									$('#input-address').on('change', function() {
 										//$('body').append(loader);
 										$.ajax({

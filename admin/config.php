@@ -1,18 +1,18 @@
 <?php
 // HTTP
-define('HTTP_SERVER', 'http://spichelrz/admin/');
-define('HTTP_CATALOG', 'http://spichelrz/');
+define('HTTP_SERVER', 'http://spichlerz/admin/');
+define('HTTP_CATALOG', 'http://spichlerz/');
 
 // HTTPS
-define('HTTPS_SERVER', 'http://spichelrz/admin/');
-define('HTTPS_CATALOG', 'http://spichelrz/');
+define('HTTPS_SERVER', 'http://spichlerz/admin/');
+define('HTTPS_CATALOG', 'http://spichlerz/');
 
 // DIR
-define('DIR_APPLICATION', 'E:/OsPanel/domains/spichelrz/admin/');
-define('DIR_CATALOG', 'E:/OsPanel/domains/spichelrz/admin/');
-define('DIR_SYSTEM', 'E:/OsPanel/domains/spichelrz/system/');
-define('DIR_IMAGE', "E:/OsPanel/domains/spichelrz/image/");
-define('DIR_STORAGE', "E:/OsPanel/domains/spichelrz/storage/");
+define('DIR_APPLICATION', 'E:/OsPanel/domains/spichlerz/admin/');
+define('DIR_CATALOG', 'E:/OsPanel/domains/spichlerz/admin/');
+define('DIR_SYSTEM', 'E:/OsPanel/domains/spichlerz/system/');
+define('DIR_IMAGE', "E:/OsPanel/domains/spichlerz/image/");
+define('DIR_STORAGE', "E:/OsPanel/domains/spichlerz/storage/");
 define('DIR_LANGUAGE', DIR_APPLICATION . 'language/');
 define('DIR_TEMPLATE', DIR_APPLICATION . 'view/template/');
 define('DIR_CONFIG', DIR_SYSTEM . 'config/');

@@ -1,15 +1,15 @@
 <?php
 // HTTP
-define('HTTP_SERVER', 'http://spichelrz/');
+define('HTTP_SERVER', 'http://spichlerz/');
 
 // HTTPS
-define('HTTPS_SERVER', 'http://spichelrz/');
+define('HTTPS_SERVER', 'http://spichlerz/');
 
 // DIR
-define('DIR_APPLICATION', 'E:/OsPanel/domains/spichelrz/catalog/');
-define('DIR_SYSTEM', 'E:/OsPanel/domains/spichelrz/system/');
-define('DIR_IMAGE', "E:/OsPanel/domains/spichelrz/image/");
-define('DIR_STORAGE', "E:/OsPanel/domains/spichelrz/storage/");
+define('DIR_APPLICATION', 'E:/OsPanel/domains/spichlerz/catalog/');
+define('DIR_SYSTEM', 'E:/OsPanel/domains/spichlerz/system/');
+define('DIR_IMAGE', "E:/OsPanel/domains/spichlerz/image/");
+define('DIR_STORAGE', "E:/OsPanel/domains/spichlerz/storage/");
 define('DIR_LANGUAGE', DIR_APPLICATION . 'language/');
 define('DIR_TEMPLATE', DIR_APPLICATION . 'view/theme/');
 define('DIR_CONFIG', DIR_SYSTEM . 'config/');
