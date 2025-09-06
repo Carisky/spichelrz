@@ -22,13 +22,45 @@ class ControllerAccountReset extends Controller {
 
 			$this->document->setTitle($this->language->get('heading_title'));
 
-			if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
-				$this->model_account_customer->editPassword($customer_info['email'], $this->request->post['password']);
+            if (($this->request->server['REQUEST_METHOD'] == 'POST') && $this->validate()) {
+                $this->model_account_customer->editPassword($customer_info['email'], $this->request->post['password']);
 
-				$this->session->data['success'] = $this->language->get('text_success');
+                // Show a success page with the account email
+                $data['breadcrumbs'] = array();
+                $data['breadcrumbs'][] = array(
+                    'text' => $this->language->get('text_home'),
+                    'href' => $this->url->link('common/home')
+                );
+                $data['breadcrumbs'][] = array(
+                    'text' => $this->language->get('text_account'),
+                    'href' => $this->url->link('account/account', '', true)
+                );
+                $data['breadcrumbs'][] = array(
+                    'text' => $this->language->get('heading_title'),
+                    'href' => $this->url->link('account/reset', '', true)
+                );
 
-				$this->response->redirect($this->url->link('account/login', '', true));
-			}
+                $this->document->setTitle($this->language->get('heading_title'));
+                $data['heading_title'] = $this->language->get('heading_title');
+                // Prefer message with email if available in language, else fallback
+                $text_success_reset = $this->language->get('text_success_reset');
+                if ($text_success_reset && $text_success_reset !== 'text_success_reset') {
+                    $data['text_message'] = sprintf($text_success_reset, $customer_info['email']);
+                } else {
+                    $data['text_message'] = $this->language->get('text_success');
+                }
+                $data['continue'] = $this->url->link('account/login', '', true);
+
+                $data['column_left'] = $this->load->controller('common/column_left');
+                $data['column_right'] = $this->load->controller('common/column_right');
+                $data['content_top'] = $this->load->controller('common/content_top');
+                $data['content_bottom'] = $this->load->controller('common/content_bottom');
+                $data['footer'] = $this->load->controller('common/footer');
+                $data['header'] = $this->load->controller('common/header');
+
+                $this->response->setOutput($this->load->view('common/success', $data));
+                return;
+            }
 
 			$data['breadcrumbs'] = array();
 

@@ -6,6 +6,7 @@ $_['heading_title']  = 'Reset your password';
 $_['text_account']   = 'Account';
 $_['text_password']  = 'Enter the new password you wish to use.';
 $_['text_success']   = 'Success: Your password has been successfully updated.';
+$_['text_success_reset']   = 'Success: The password for %s has been updated. You can now log in.';
 
 // Entry
 $_['entry_password'] = 'Password';

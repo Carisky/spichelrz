@@ -6,6 +6,7 @@ $_['heading_title']  = 'Przywróć swoje hasło';
 $_['text_account']   = 'Konto';
 $_['text_password']  = 'Wprowadź nowe hasło, którego chcesz użyć.';
 $_['text_success']   = 'Sukces: Hasło zostało pomyślnie zaktualizowane.';
+$_['text_success_reset'] = 'Sukces: Hasło dla %s zostało zaktualizowane. Możesz się teraz zalogować.';
 
 // Entry
 $_['entry_password'] = 'Hasło';
