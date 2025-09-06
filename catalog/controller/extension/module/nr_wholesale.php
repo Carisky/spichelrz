@@ -417,7 +417,7 @@ class ControllerExtensionModuleNrWholesale extends Controller
 
         $total_gross = round($amount_gross_after_tier, 2);
 
-        if ($total_gross > 1500) {
+        if ($total_gross > 600) {
             $shipping = 0.0;
         } else {
             $total_gross += $shipping;
@@ -656,8 +656,8 @@ class ControllerExtensionModuleNrWholesale extends Controller
 
         $order_data['shipping_method'] = $this->session->data['shipping_method']['title'] ?? 'Metoda dostawy';
         $order_data['shipping_code']   = $this->session->data['shipping_method']['code']  ?? '';
-
-        if ($total_after_discounts > 1500) {
+        //TODO : change hardcode discount to dynamic which can be managed from admin panel
+        if ($total_after_discounts > 600) {
             $shipping_cost = 0.0;
         }
 
