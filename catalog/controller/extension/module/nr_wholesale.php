@@ -656,10 +656,13 @@ class ControllerExtensionModuleNrWholesale extends Controller
 
         $order_data['shipping_method'] = $this->session->data['shipping_method']['title'] ?? 'Metoda dostawy';
         $order_data['shipping_code']   = $this->session->data['shipping_method']['code']  ?? '';
-        //TODO : change hardcode discount to dynamic which can be managed from admin panel
-        if ($total_after_discounts > 600) {
+
+        // вместо $free_shipping_threshold из конфигурации
+        $free_shipping_threshold = 600.0;
+        if ($total_after_discounts >= $free_shipping_threshold) {
             $shipping_cost = 0.0;
         }
+
 
         $total = $total_after_discounts + $shipping_cost;
 

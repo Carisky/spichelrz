@@ -9828,3 +9828,24 @@
 2025-08-28 8:47:11 - PHP Warning:  Undefined array key "zone_id" in E:\OsPanel\domains\spichlerz\catalog\model\extension\payment\bank_transfer.php on line 6
 2025-08-28 8:47:11 - PHP Warning:  Undefined array key "country_id" in E:\OsPanel\domains\spichlerz\catalog\model\extension\payment\payu.php on line 17
 2025-08-28 8:47:11 - PHP Warning:  Undefined array key "zone_id" in E:\OsPanel\domains\spichlerz\catalog\model\extension\payment\payu.php on line 17
+2025-09-17 12:33:02 - PHP Warning:  Undefined array key "shipping_address" in E:\OsPanel\domains\spichlerz\catalog\controller\extension\module\nr_wholesale.php on line 171
+2025-09-17 12:33:02 - PHP Warning:  Trying to access array offset on value of type null in E:\OsPanel\domains\spichlerz\catalog\model\extension\payment\cod.php on line 6
+2025-09-17 12:33:02 - PHP Warning:  Trying to access array offset on value of type null in E:\OsPanel\domains\spichlerz\catalog\model\extension\payment\cod.php on line 6
+2025-09-17 12:33:02 - PHP Warning:  Undefined array key "shipping_address" in E:\OsPanel\domains\spichlerz\catalog\controller\extension\module\nr_wholesale.php on line 171
+2025-09-17 12:33:03 - PHP Warning:  Trying to access array offset on value of type null in E:\OsPanel\domains\spichlerz\catalog\model\extension\payment\bank_transfer.php on line 6
+2025-09-17 12:33:03 - PHP Warning:  Trying to access array offset on value of type null in E:\OsPanel\domains\spichlerz\catalog\model\extension\payment\bank_transfer.php on line 6
+2025-09-17 12:33:03 - PHP Warning:  Undefined array key "shipping_address" in E:\OsPanel\domains\spichlerz\catalog\controller\extension\module\nr_wholesale.php on line 171
+2025-09-17 12:33:03 - PHP Warning:  Trying to access array offset on value of type null in E:\OsPanel\domains\spichlerz\catalog\model\extension\payment\payu.php on line 17
+2025-09-17 12:33:03 - PHP Warning:  Trying to access array offset on value of type null in E:\OsPanel\domains\spichlerz\catalog\model\extension\payment\payu.php on line 17
+2025-09-17 12:33:03 - PHP Warning:  Undefined array key "country_id" in E:\OsPanel\domains\spichlerz\catalog\model\extension\payment\cod.php on line 6
+2025-09-17 12:33:03 - PHP Warning:  Undefined array key "zone_id" in E:\OsPanel\domains\spichlerz\catalog\model\extension\payment\cod.php on line 6
+2025-09-17 12:33:03 - PHP Warning:  Undefined array key "country_id" in E:\OsPanel\domains\spichlerz\catalog\model\extension\payment\bank_transfer.php on line 6
+2025-09-17 12:33:03 - PHP Warning:  Undefined array key "zone_id" in E:\OsPanel\domains\spichlerz\catalog\model\extension\payment\bank_transfer.php on line 6
+2025-09-17 12:33:03 - PHP Warning:  Undefined array key "country_id" in E:\OsPanel\domains\spichlerz\catalog\model\extension\payment\payu.php on line 17
+2025-09-17 12:33:03 - PHP Warning:  Undefined array key "zone_id" in E:\OsPanel\domains\spichlerz\catalog\model\extension\payment\payu.php on line 17
+2025-09-17 12:33:25 - PHP Warning:  Undefined array key "country_id" in E:\OsPanel\domains\spichlerz\catalog\model\extension\payment\cod.php on line 6
+2025-09-17 12:33:25 - PHP Warning:  Undefined array key "zone_id" in E:\OsPanel\domains\spichlerz\catalog\model\extension\payment\cod.php on line 6
+2025-09-17 12:33:25 - PHP Warning:  Undefined array key "country_id" in E:\OsPanel\domains\spichlerz\catalog\model\extension\payment\bank_transfer.php on line 6
+2025-09-17 12:33:25 - PHP Warning:  Undefined array key "zone_id" in E:\OsPanel\domains\spichlerz\catalog\model\extension\payment\bank_transfer.php on line 6
+2025-09-17 12:33:25 - PHP Warning:  Undefined array key "country_id" in E:\OsPanel\domains\spichlerz\catalog\model\extension\payment\payu.php on line 17
+2025-09-17 12:33:25 - PHP Warning:  Undefined array key "zone_id" in E:\OsPanel\domains\spichlerz\catalog\model\extension\payment\payu.php on line 17

@@ -1,8 +1,10 @@
 <?php
-class ControllerCommonCookie extends Controller {
-    public function index() {
+class ControllerCommonCookie extends Controller
+{
+    public function index()
+    {
         // скрываем ТОЛЬКО если уже согласились
-        if (!empty($this->session->data['cookie_consent']) && $this->session->data['cookie_consent'] === true) {
+        if (!empty($_COOKIE['cookie_consent']) && $_COOKIE['cookie_consent'] === '1') {
             return '';
         }
 
@@ -15,15 +17,29 @@ class ControllerCommonCookie extends Controller {
         return $this->load->view('common/cookie', $data);
     }
 
-    public function agree() {
-        $this->session->data['cookie_consent'] = true;
+    public function agree()
+    {
+        setcookie('cookie_consent', '1', [
+            'expires'  => time() + 31536000,
+            'path'     => '/',
+            'secure'   => !empty($_SERVER['HTTPS']),
+            'httponly' => false,
+            'samesite' => 'Lax',
+        ]);
+        $this->session->data['cookie_consent'] = true; // можно оставить дублирование
         $this->response->setOutput('1');
     }
 
-    public function disagree() {
-        // чтобы баннер снова показывался при «Отклонить»
+    public function disagree()
+    {
+        setcookie('cookie_consent', '', [
+            'expires'  => time() - 3600,
+            'path'     => '/',
+            'secure'   => !empty($_SERVER['HTTPS']),
+            'httponly' => false,
+            'samesite' => 'Lax',
+        ]);
         unset($this->session->data['cookie_consent']);
         $this->response->setOutput('1');
     }
 }
-?>
